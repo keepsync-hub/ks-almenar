@@ -345,3 +345,182 @@ tr.evaluacion--realizada td { opacity: 0.6; }
   font-size: 0.88rem;
   margin-bottom: calc(var(--paso) * 1.5);
 }
+
+/* =========================================================
+   Vista de calendario de evaluaciones
+   ========================================================= */
+
+.vistas {
+  display: flex; gap: var(--paso); flex-wrap: wrap; align-items: center;
+  margin-bottom: calc(var(--paso) * 3);
+}
+
+.cal__barra {
+  display: flex; gap: var(--paso); align-items: center; flex-wrap: wrap;
+  margin-bottom: calc(var(--paso) * 2);
+}
+
+.cal {
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  background: var(--papel);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal__cabecera {
+  background: var(--celeste);
+  border-bottom: var(--borde);
+  border-right: var(--borde-fino);
+  padding: 8px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.cal__cabecera:last-of-type { border-right: none; }
+
+/* Cada día es un botón: se puede tabular y activar con teclado */
+.cal__dia {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: var(--papel);
+  border: none;
+  border-right: var(--borde-fino);
+  border-bottom: var(--borde-fino);
+  padding: 8px 7px;
+  min-height: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background .08s ease;
+}
+.cal__dia:nth-child(7n + 7) { border-right: none; }
+.cal__dia:hover { background: var(--papel-hueso); }
+
+.cal__num { font-size: 1.15rem; font-weight: 700; line-height: 1; }
+.cal__mes {
+  font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--tinta-suave);
+}
+
+.cal__dia--fuera { opacity: 0.4; }
+.cal__dia--pasado { background: repeating-linear-gradient(45deg, var(--papel), var(--papel) 6px, var(--papel-hueso) 6px, var(--papel-hueso) 12px); }
+.cal__dia--hoy { box-shadow: inset 0 0 0 3px var(--tinta); }
+
+/* Día marcado para estudiar */
+.cal__dia[aria-pressed="true"] { background: var(--menta); }
+.cal__dia[aria-pressed="true"] .cal__num::after {
+  content: ' ✓';
+  font-size: 0.9rem;
+}
+
+.cal__ev {
+  border: var(--borde-fino);
+  padding: 2px 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.cal__ev--celeste  { background: var(--celeste); }
+.cal__ev--amarillo { background: var(--amarillo); }
+.cal__ev--realizada { opacity: 0.5; text-decoration: line-through; }
+.cal__ev-corto { display: none; }
+
+/* ---------------- Plan de estudio ---------------- */
+
+.plan {
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  background: var(--papel);
+  padding: calc(var(--paso) * 2.5);
+  margin-top: calc(var(--paso) * 3);
+}
+.plan__titulo { margin-bottom: calc(var(--paso) * 1.5); }
+.plan__resumen { display: flex; gap: var(--paso); flex-wrap: wrap; margin-bottom: calc(var(--paso) * 2); }
+
+.plan__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--paso); }
+.plan__fila {
+  border: var(--borde-fino);
+  padding: 10px 12px;
+  display: flex; justify-content: space-between; gap: var(--paso); flex-wrap: wrap; align-items: center;
+}
+.plan__fila--sinestudio { background: var(--rosa); }
+.plan__que { font-weight: 700; }
+.plan__cuando { font-size: 0.85rem; }
+
+.boton-pdf {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--amarillo);
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  padding: 14px 22px;
+  margin-top: calc(var(--paso) * 3);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.boton-pdf:hover { transform: translate(-2px, -2px); box-shadow: var(--sombra-lg); }
+.boton-pdf:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--tinta); }
+.pdf-ayuda { font-size: 0.85rem; color: var(--tinta-suave); margin-top: var(--paso); }
+
+/* ---------------- Versión imprimible ---------------- */
+
+.plan-print { display: none; }
+
+@media (max-width: 700px) {
+  .cal__dia { min-height: 76px; padding: 6px 4px; }
+  .cal__num { font-size: 0.95rem; }
+  .cal__ev { font-size: 0.62rem; padding: 1px 3px; text-align: center; }
+  .cal__ev-largo { display: none; }
+  .cal__ev-corto { display: inline; }
+  .cal__cabecera { font-size: 0.6rem; padding: 6px 2px; }
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 14mm; }
+
+  /* Al imprimir el plan, el resto del portal desaparece */
+  body.modo-plan .cabecera,
+  body.modo-plan .navegacion,
+  body.modo-plan main,
+  body.modo-plan .pie { display: none !important; }
+  body.modo-plan .plan-print { display: block !important; }
+  body.modo-plan { background: #fff; }
+
+  .plan-print h1 { font-size: 1.6rem; margin-bottom: 6px; }
+  .plan-print .sub { font-size: 0.85rem; color: #444; margin-bottom: 16px; }
+  .plan-print h2 { font-size: 1rem; margin: 18px 0 8px; }
+
+  .plan-print .cal { box-shadow: none; border: 2px solid #000; break-inside: avoid; }
+  .plan-print .cal__dia { min-height: 70px; }
+
+  /* En blanco y negro el color no sirve: el día de estudio se marca con fondo
+     más oscuro y una barra lateral, además del ✓ que ya trae. */
+  .plan-print .cal__dia[aria-pressed="true"] {
+    background: #cfcfcf !important;
+    box-shadow: inset 4px 0 0 #000;
+  }
+  .plan-print .cal__dia--pasado { background: #f6f6f6 !important; }
+
+  .plan-print table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .plan-print th, .plan-print td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
+  .plan-print thead th { background: #eee; }
+
+  /* Que la tabla se pueda cortar entre páginas sin perder el encabezado
+     ni partir una fila por la mitad. */
+  .plan-print thead { display: table-header-group; }
+  .plan-print tr { break-inside: avoid; }
+  .plan-print h2 { break-after: avoid; }
+  .plan-print .nota { font-size: 0.75rem; color: #444; margin-top: 14px; }
+}
+
+.plan__aclaracion {
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+  margin-bottom: calc(var(--paso) * 2);
+  max-width: 70ch;
+}
