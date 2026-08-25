@@ -58,3 +58,20 @@ El nombre de la credencial no dice a qué cuenta apunta. Si alguna vez hay dudas
 - **Destinatario:** campo `To` del nodo `Enviar resumen por correo`.
 - **Remitentes vigilados:** parámetro `q` del nodo `Buscar correos del colegio`.
 - **Modelo:** nodo `Modelo OpenRouter`.
+
+### Segunda rama: publicar en el portal
+
+Desde `Preparar correos para el resumen` sale una segunda rama que actualiza GitHub Pages:
+
+| Paso | Nodo | Detalle |
+| --- | --- | --- |
+| 1 | `Leer auto.js publicado` | GET a raw.githubusercontent de `docs/auto.js` |
+| 2 | `Leer data.js publicado` | GET de `docs/data.js`, para que el extractor sepa qué ya está publicado |
+| 3 | `Extraer novedades` | LLM + Structured Output Parser → `{eventos, recordatorios, evaluaciones}` |
+| 4 | `Fusionar novedades` | Code: dedup por curso+fecha+título, poda lo vencido hace más de 45 días |
+| 5 | `Solo si hay cambios` | Filter: si el archivo quedaría igual, no se hace commit |
+| 6 | `Publicar auto.js en GitHub` | Escribe `docs/auto.js` en `main` con la credencial `GitHub OAuth2 API` |
+
+**Garantía de seguridad:** el workflow escribe únicamente en `docs/auto.js`. `data.js` —donde vive el calendario de evaluaciones transcrito de los adjuntos— nunca se toca. Y si la lectura de `auto.js` falla, el Code node aborta sin escribir, para no publicar un archivo a medias.
+
+El commit en `main` dispara el rebuild de GitHub Pages automáticamente.
