@@ -12,21 +12,32 @@ Automatizaciones y portal familiar para los correos del Colegio Almenar.
 
 ## Publicar el portal
 
-En **Settings → Pages** del repositorio:
+El despliegue lo hace GitHub Actions: [`.github/workflows/pages.yml`](./.github/workflows/pages.yml).
 
-- **Source:** Deploy from a branch
-- **Branch:** `main` · carpeta `/docs`
+Cada push a `main` que toque `docs/` —incluidos los commits que hace n8n en su
+corrida diaria— dispara dos jobs:
 
-Queda en `https://keepsync-hub.github.io/ks-almenar/`.
+1. **Verificar los datos del portal.** Chequea la sintaxis de `data.js`, `auto.js`
+   y `app.js`, y valida el contenido: cursos conocidos, fechas que existen de
+   verdad, prioridades y estados dentro de los valores permitidos, ids de
+   recordatorio sin repetir. Si algo falla, **no se publica**.
+2. **Publicar en GitHub Pages.** Empaqueta `docs/` y despliega.
 
-El portal es público a propósito: está pensado para compartirse por enlace con los
-demás apoderados de Kínder A y 4° B. Lleva `noindex` y un `robots.txt` restrictivo,
-así que se comparte por URL pero no aparece en buscadores.
+En los pull requests corre solo el primer job, así un dato malo se ve antes de
+mergear.
 
-> **Criterio de contenido:** solo va lo que las profesoras enviaron a todo el curso.
-> Los correos dirigidos a una familia en particular (rúbricas individuales,
-> reconocimientos personales) quedan fuera. Detalle en la sección 10 de
-> [BUENAS-PRACTICAS-PORTAL.md](./BUENAS-PRACTICAS-PORTAL.md).
+El sitio queda en `https://keepsync-hub.github.io/ks-almenar/`.
+
+> El workflow usa `actions/configure-pages` con `enablement: true`, así que
+> habilita Pages solo en la primera corrida. Si la organización no permite que
+> Actions lo habilite, hay que ir una vez a **Settings → Pages** y elegir
+> **Source: GitHub Actions** (no "Deploy from a branch").
+
+### Por qué hay una verificación antes de publicar
+
+`docs/auto.js` lo escribe n8n sin que nadie lo revise. Sin este control, una
+corrida que produjera algo malformado rompería el portal para todos los
+apoderados hasta que alguien lo notara. El job lo detiene antes.
 
 ## Actualizar la agenda
 
