@@ -424,6 +424,332 @@
     });
   }
 
+  /* ---------- calendario de evaluaciones y plan de estudio ---------- */
+
+  var CLAVE_ESTUDIO = 'portal-almenar:diasEstudio';
+  var SEMANAS_VISIBLES = 3;
+  var DIAS_CABECERA = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+  var desplazamiento = 0;
+
+  function claveFecha(d) {
+    var m = String(d.getMonth() + 1);
+    var dia = String(d.getDate());
+    return d.getFullYear() + '-' + (m.length < 2 ? '0' + m : m) + '-' + (dia.length < 2 ? '0' + dia : dia);
+  }
+
+  // Semana chilena: parte el lunes. getDay() devuelve 0 para domingo.
+  function lunesDe(fecha) {
+    var d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+    var dia = d.getDay();
+    d.setDate(d.getDate() - (dia === 0 ? 6 : dia - 1));
+    return d;
+  }
+
+  function sumarDias(d, n) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  function leerDiasEstudio() {
+    try {
+      var crudo = window.localStorage.getItem(CLAVE_ESTUDIO);
+      return crudo ? JSON.parse(crudo) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function guardarDiasEstudio(mapa) {
+    try {
+      window.localStorage.setItem(CLAVE_ESTUDIO, JSON.stringify(mapa));
+    } catch (e) {
+      /* Modo privado: la marca vive solo mientras dure la pestaña. */
+    }
+  }
+
+  var diasEstudio = leerDiasEstudio();
+
+  function podarDiasEstudio() {
+    var limite = claveFecha(sumarDias(hoy(), -60));
+    var cambio = false;
+    Object.keys(diasEstudio).forEach(function (k) {
+      if (k < limite) { delete diasEstudio[k]; cambio = true; }
+    });
+    if (cambio) { guardarDiasEstudio(diasEstudio); }
+  }
+
+  function evaluacionesVisibles() {
+    return EVALUACIONES.filter(function (ev) { return ev.fecha && visible(ev.curso); });
+  }
+
+  function diasEstudioSeleccionados() {
+    var claveHoy = claveFecha(hoy());
+    return Object.keys(diasEstudio).filter(function (k) { return k >= claveHoy; }).sort();
+  }
+
+  function evaluacionesPorDelante() {
+    var claveHoy = claveFecha(hoy());
+    return evaluacionesVisibles()
+      .filter(function (ev) { return ev.estado !== 'realizada' && ev.fecha >= claveHoy; })
+      .sort(function (a, b) { return a.fecha.localeCompare(b.fecha); });
+  }
+
+  // Días marcados que caen entre hoy y la fecha de la evaluación, inclusive.
+  function estudioAntesDe(fecha, seleccionados) {
+    return seleccionados.filter(function (k) { return k <= fecha; }).length;
+  }
+
+  function pintarCalendario() {
+    var cont = document.getElementById('calendario');
+    if (!cont) { return; }
+    vaciar(cont);
+
+    var inicio = sumarDias(lunesDe(hoy()), desplazamiento * SEMANAS_VISIBLES * 7);
+    var claveHoy = claveFecha(hoy());
+
+    var porDia = {};
+    evaluacionesVisibles().forEach(function (ev) {
+      if (!porDia[ev.fecha]) { porDia[ev.fecha] = []; }
+      porDia[ev.fecha].push(ev);
+    });
+
+    DIAS_CABECERA.forEach(function (d) {
+      cont.appendChild(el('div', 'cal__cabecera', d));
+    });
+
+    var total = SEMANAS_VISIBLES * 7;
+    for (var i = 0; i < total; i++) {
+      cont.appendChild(celdaDia(sumarDias(inicio, i), i, claveHoy, porDia));
+    }
+
+    var fin = sumarDias(inicio, total - 1);
+    document.getElementById('calRango').textContent =
+      fechaLarga(claveFecha(inicio)) + ' al ' + fechaLarga(claveFecha(fin));
+
+    avisarEvaluacionesFuera(claveFecha(fin));
+  }
+
+  // En una celda de calendario "Historia, Geografia y C. Sociales" se parte a
+  // mitad de palabra. Cortamos por la primera coma o " y ", que cubre todos los
+  // nombres largos que usa el colegio.
+  function asignaturaCorta(nombre) {
+    return String(nombre || '').split(/,| y /i)[0].trim();
+  }
+
+  function celdaDia(fecha, indice, claveHoy, porDia) {
+    var k = claveFecha(fecha);
+    var celda = document.createElement('button');
+    celda.type = 'button';
+    celda.className = 'cal__dia' +
+      (k < claveHoy ? ' cal__dia--pasado' : '') +
+      (k === claveHoy ? ' cal__dia--hoy' : '');
+    celda.setAttribute('aria-pressed', String(!!diasEstudio[k]));
+    celda.setAttribute('aria-label', fechaLarga(k) + ': marcar como día de estudio');
+
+    var linea = el('div');
+    linea.appendChild(el('span', 'cal__num', String(fecha.getDate())));
+    if (fecha.getDate() === 1 || indice === 0) {
+      linea.appendChild(document.createTextNode(' '));
+      linea.appendChild(el('span', 'cal__mes', MESES[fecha.getMonth()]));
+    }
+    celda.appendChild(linea);
+
+    (porDia[k] || []).forEach(function (ev) {
+      var curso = PORTAL.cursos[ev.curso];
+      var corta = asignaturaCorta(ev.asignatura);
+      var chip = el('span',
+        'cal__ev cal__ev--' + (curso ? curso.tono : 'papel') +
+        (ev.estado === 'realizada' ? ' cal__ev--realizada' : ''));
+      // En móvil la celda mide ~50px: no cabe ninguna palabra entera, así que
+      // se muestran tres letras y el nombre completo queda en el title.
+      chip.appendChild(el('span', 'cal__ev-largo', corta));
+      chip.appendChild(el('span', 'cal__ev-corto', corta.slice(0, 3)));
+      chip.title = ev.asignatura + ' — ' + ev.titulo;
+      celda.appendChild(chip);
+    });
+
+    celda.addEventListener('click', function () {
+      if (diasEstudio[k]) { delete diasEstudio[k]; } else { diasEstudio[k] = true; }
+      guardarDiasEstudio(diasEstudio);
+      celda.setAttribute('aria-pressed', String(!!diasEstudio[k]));
+      pintarPlan();
+    });
+
+    return celda;
+  }
+
+  // Con una ventana de 3 semanas es fácil no ver una prueba de octubre.
+  function avisarEvaluacionesFuera(claveFin) {
+    var aviso = document.getElementById('calFuera');
+    if (!aviso) { return; }
+    var claveHoy = claveFecha(hoy());
+    var fuera = evaluacionesVisibles()
+      .filter(function (ev) {
+        return ev.estado !== 'realizada' && ev.fecha > claveFin && ev.fecha >= claveHoy;
+      })
+      .sort(function (a, b) { return a.fecha.localeCompare(b.fecha); });
+
+    if (!fuera.length) { aviso.hidden = true; return; }
+    aviso.hidden = false;
+    aviso.textContent = 'Fuera de estas tres semanas quedan ' + fuera.length +
+      (fuera.length === 1 ? ' evaluación más. Es el ' : ' evaluaciones más. La siguiente es el ') +
+      fechaLarga(fuera[0].fecha) + ', ' + fuera[0].asignatura + '.';
+  }
+
+  function pintarPlan() {
+    var cont = document.getElementById('plan');
+    if (!cont) { return; }
+    vaciar(cont);
+
+    var seleccionados = diasEstudioSeleccionados();
+    var proximas = evaluacionesPorDelante();
+
+    var caja = el('div', 'plan');
+    caja.appendChild(el('h3', 'plan__titulo', 'Plan de estudio'));
+
+    var resumen = el('div', 'plan__resumen');
+    resumen.appendChild(el('span', 'chip chip--menta',
+      seleccionados.length + (seleccionados.length === 1 ? ' día marcado' : ' días marcados')));
+    resumen.appendChild(el('span', 'chip chip--durazno',
+      proximas.length + (proximas.length === 1 ? ' evaluación por delante' : ' evaluaciones por delante')));
+    caja.appendChild(resumen);
+
+    if (!proximas.length) {
+      caja.appendChild(el('div', 'vacio', 'No hay evaluaciones próximas para este filtro.'));
+      cont.appendChild(caja);
+      return;
+    }
+
+    caja.appendChild(el('p', 'plan__aclaracion',
+      '"X días antes" cuenta los días que marcaste entre hoy y esa fecha. Se avisa en rojo solo si una evaluación de las próximas dos semanas no tiene ninguno.'));
+
+    var lista = el('ul', 'plan__lista');
+    proximas.forEach(function (ev) {
+      var antes = estudioAntesDe(ev.fecha, seleccionados);
+      var dias = diasHasta(ev.fecha);
+      // Marcar en rojo TODO lo que no tenga dias asignados convierte el plan en
+      // un muro de alarma. Solo urge lo que esta a menos de dos semanas.
+      var urgeSinEstudio = (antes === 0 && dias <= 14);
+
+      var fila = el('li', 'plan__fila' + (urgeSinEstudio ? ' plan__fila--sinestudio' : ''));
+
+      var izq = el('div');
+      izq.appendChild(el('div', 'plan__que', ev.asignatura + ' — ' + ev.titulo));
+      izq.appendChild(el('div', 'plan__cuando',
+        fechaLarga(ev.fecha) + ' · ' + (dias === 0 ? 'es hoy' : 'en ' + dias + (dias === 1 ? ' día' : ' días'))));
+      fila.appendChild(izq);
+
+      var der = el('div', 'evento__chips');
+      der.appendChild(chipCurso(ev.curso));
+      if (antes) {
+        der.appendChild(el('span', 'chip chip--menta', antes + (antes === 1 ? ' día antes' : ' días antes')));
+      } else {
+        der.appendChild(el('span', 'chip ' + (urgeSinEstudio ? 'chip--rosa' : ''), 'sin días marcados'));
+      }
+      fila.appendChild(der);
+
+      lista.appendChild(fila);
+    });
+    caja.appendChild(lista);
+    cont.appendChild(caja);
+  }
+
+  /* ---------- versión para imprimir / guardar como PDF ---------- */
+
+  function filaTabla(tag, valores) {
+    var tr = document.createElement('tr');
+    valores.forEach(function (v) {
+      var celda = document.createElement(tag);
+      celda.textContent = v;
+      tr.appendChild(celda);
+    });
+    return tr;
+  }
+
+  function construirPlanImprimible() {
+    var cont = document.getElementById('planImprimible');
+    if (!cont) { return; }
+    vaciar(cont);
+
+    var claveHoy = claveFecha(hoy());
+    var seleccionados = diasEstudioSeleccionados();
+    var proximas = evaluacionesPorDelante();
+    var curso = PORTAL.cursos[cursoActivo];
+
+    cont.appendChild(el('h1', null, 'Plan de estudio'));
+    cont.appendChild(el('div', 'sub',
+      (cursoActivo === 'todos' ? 'Kínder A y 4° B' : (curso ? curso.nombre : cursoActivo)) +
+      ' · generado el ' + fechaLarga(claveHoy)));
+
+    var calendario = document.getElementById('calendario');
+    if (calendario) {
+      cont.appendChild(el('h2', null, 'Calendario'));
+      cont.appendChild(calendario.cloneNode(true));
+    }
+
+    cont.appendChild(el('h2', null, 'Evaluaciones por delante'));
+    if (proximas.length) {
+      var tabla = document.createElement('table');
+      var thead = document.createElement('thead');
+      thead.appendChild(filaTabla('th', ['Fecha', 'Curso', 'Asignatura', 'Evaluación', 'Faltan', 'Días marcados antes']));
+      tabla.appendChild(thead);
+
+      var tbody = document.createElement('tbody');
+      proximas.forEach(function (ev) {
+        var dias = diasHasta(ev.fecha);
+        tbody.appendChild(filaTabla('td', [
+          fechaLarga(ev.fecha),
+          (PORTAL.cursos[ev.curso] || {}).nombre || ev.curso,
+          ev.asignatura,
+          ev.titulo,
+          dias === 0 ? 'es hoy' : dias + (dias === 1 ? ' día' : ' días'),
+          String(estudioAntesDe(ev.fecha, seleccionados))
+        ]));
+      });
+      tabla.appendChild(tbody);
+      cont.appendChild(tabla);
+    } else {
+      cont.appendChild(el('p', null, 'No hay evaluaciones próximas.'));
+    }
+
+    cont.appendChild(el('h2', null, 'Días marcados para estudiar'));
+    if (seleccionados.length) {
+      var ul = document.createElement('ul');
+      seleccionados.forEach(function (k) {
+        ul.appendChild(el('li', null, fechaLarga(k)));
+      });
+      cont.appendChild(ul);
+    } else {
+      cont.appendChild(el('p', null, 'Todavía no hay días marcados.'));
+    }
+
+    cont.appendChild(el('p', 'nota',
+      'El calendario oficial de evaluaciones vive en Lirmi. Este plan es una ayuda para organizarse; ante cualquier diferencia manda Lirmi y la agenda escolar.'));
+  }
+
+  function imprimirPlan() {
+    construirPlanImprimible();
+    document.body.classList.add('modo-plan');
+
+    function limpiar() {
+      document.body.classList.remove('modo-plan');
+      window.removeEventListener('afterprint', limpiar);
+    }
+    window.addEventListener('afterprint', limpiar);
+    window.print();
+  }
+
+  function aplicarVista(v) {
+    var cal = document.getElementById('vistaCalendario');
+    var lis = document.getElementById('vistaLista');
+    if (cal) { cal.hidden = (v !== 'calendario'); }
+    if (lis) { lis.hidden = (v !== 'lista'); }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vista]'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.vista === v));
+    });
+  }
+
   /* ---------- filtro ---------- */
 
   function aplicarFiltro(curso, etiquetaTexto) {
@@ -464,18 +790,39 @@
     pintarAgenda();
     pintarRecordatorios();
     pintarEvaluaciones();
+    pintarCalendario();
+    pintarPlan();
   }
 
   function iniciar() {
+    podarDiasEstudio();
     pintarCabecera();
     pintarFuenteOficial();
     pintarTodo();
 
-    Array.prototype.forEach.call(document.querySelectorAll('.filtro__boton'), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll('.filtro__boton[data-curso]'), function (b) {
       b.addEventListener('click', function () {
         aplicarFiltro(b.dataset.curso, b.textContent.trim());
       });
     });
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-vista]'), function (b) {
+      b.addEventListener('click', function () { aplicarVista(b.dataset.vista); });
+    });
+
+    document.getElementById('calAtras').addEventListener('click', function () {
+      desplazamiento = desplazamiento - 1;
+      pintarCalendario();
+    });
+    document.getElementById('calAdelante').addEventListener('click', function () {
+      desplazamiento = desplazamiento + 1;
+      pintarCalendario();
+    });
+    document.getElementById('calHoy').addEventListener('click', function () {
+      desplazamiento = 0;
+      pintarCalendario();
+    });
+    document.getElementById('botonPdf').addEventListener('click', imprimirPlan);
   }
 
   if (document.readyState === 'loading') {

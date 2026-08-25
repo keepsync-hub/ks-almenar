@@ -100,3 +100,37 @@ Si n8n detectó algo y quieres corregirlo o dejarlo fijo:
 
 No hace falta borrar nada de `auto.js`; el workflow lo va limpiando cuando los
 ítems quedan más de 45 días en el pasado.
+
+---
+
+## La vista de calendario
+
+La sección de Evaluaciones tiene dos vistas: **Calendario** (por defecto) y **Lista
+completa**. El calendario muestra tres semanas de lunes a domingo y sale de los
+mismos datos: no hay nada que mantener aparte.
+
+Para que una evaluación aparezca en el calendario necesita `fecha` y un `curso`
+válido. Las que están `realizada` salen tachadas.
+
+### Días de estudio
+
+Tocar un día lo marca como día de estudio. Se guarda en `localStorage` del
+navegador de cada persona: no viaja al repositorio ni se comparte con los demás
+apoderados. Los días que quedan más de 60 días en el pasado se borran solos.
+
+El plan cuenta, para cada evaluación, cuántos días marcados hay entre hoy y esa
+fecha. Solo avisa en rojo si una evaluación de las próximas dos semanas no tiene
+ninguno — marcar todo en rojo convertía el plan en un muro de alarma inútil.
+
+### El PDF
+
+El botón abre el diálogo de impresión del navegador con una hoja pensada para A4:
+el resto del portal se oculta y queda solo el plan. Desde ahí se elige "Guardar
+como PDF".
+
+Se hace así a propósito, en vez de incluir una librería de PDF: son ~350 kB de
+JavaScript para un botón, y el portal no tiene ninguna dependencia. La impresión
+del navegador además da mejor tipografía y funciona igual en iOS y Android.
+
+En la hoja impresa el color no se puede usar como señal, así que el día de estudio
+se marca con fondo gris, una barra negra al costado y un ✓.

@@ -85,6 +85,34 @@
 
     <div class="fuente" id="fuenteOficial"></div>
 
+    <div class="vistas" role="group" aria-label="Forma de ver las evaluaciones">
+      <span class="filtro__etiqueta">Vista:</span>
+      <button class="filtro__boton" type="button" data-vista="calendario" aria-pressed="true">Calendario</button>
+      <button class="filtro__boton" type="button" data-vista="lista" aria-pressed="false">Lista completa</button>
+    </div>
+
+    <div id="vistaCalendario">
+      <div class="cal__barra">
+        <button class="filtro__boton" type="button" id="calAtras" aria-label="Tres semanas anteriores">←</button>
+        <span class="placa" id="calRango">—</span>
+        <button class="filtro__boton" type="button" id="calHoy">Hoy</button>
+        <button class="filtro__boton" type="button" id="calAdelante" aria-label="Tres semanas siguientes">→</button>
+      </div>
+
+      <p class="seccion__nota">
+        Toca un día para marcarlo como día de estudio. La selección se guarda solo en este navegador.
+      </p>
+
+      <div class="cal" id="calendario"></div>
+      <p class="evento__nota" id="calFuera" hidden></p>
+
+      <div id="plan"></div>
+
+      <button class="boton-pdf" type="button" id="botonPdf">Descargar PDF del plan de estudio</button>
+      <p class="pdf-ayuda">Se abre el diálogo de impresión: elegí <strong>Guardar como PDF</strong> como destino.</p>
+    </div>
+
+    <div id="vistaLista" hidden>
     <div class="tabla-envoltura">
       <table>
         <caption>Evaluaciones y presentaciones mencionadas en los correos</caption>
@@ -101,6 +129,7 @@
         <tbody id="cuerpoEvaluaciones"></tbody>
       </table>
     </div>
+    </div>
   </section>
 
 </main>
@@ -116,6 +145,8 @@
     que envió la profesora jefe. Para actualizarlo se edita <code>docs/data.js</code>.
   </p>
 </footer>
+
+<div class="plan-print" id="planImprimible" aria-hidden="true"></div>
 
 <script src="data.js"></script>
 <script src="auto.js"></script>
