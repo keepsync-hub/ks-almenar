@@ -25,6 +25,32 @@ fecha: null,
 fechaTexto: 'Fecha por confirmar',
 ```
 
+### Cuando un evento y una evaluación son la misma cosa
+
+La agenda muestra los eventos **más** las evaluaciones, en orden cronológico. Pero
+a veces la misma cosa está anotada en los dos lados: la Feria Científica es una
+actividad del curso y además la evaluación de Ciencias.
+
+Para que no salga dos veces, se les pone el mismo `ref` a ambos:
+
+```js
+// en eventos
+{ fecha: '2026-09-01', ref: 'feria-cientifica', curso: 'cuartob', titulo: 'Feria Científica', ... }
+
+// en evaluaciones.items
+{ fecha: '2026-09-01', ref: 'feria-cientifica', curso: 'cuartob', asignatura: 'Ciencias Naturales', ... }
+```
+
+Con eso la agenda muestra solo el evento, y la evaluación sigue apareciendo en su
+sección y en el calendario de estudio.
+
+**No se deduplica por fecha + curso**, aunque parezca más cómodo: el 28 de agosto
+conviven el Jeans Day y la prueba de Ciencias de 4° B, que son cosas distintas y
+tienen que verse las dos. El vínculo tiene que ser explícito.
+
+Si una evaluación no tiene evento equivalente, no lleva `ref` y se muestra en la
+agenda por derecho propio.
+
 ## Agregar un recordatorio
 
 ```js

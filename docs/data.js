@@ -11,7 +11,12 @@ const PORTAL = {
     cuartob: { nombre: '4° B',     profesora: 'Francisca Bravo',   tono: 'amarillo' }
   },
 
-  /* ---------------- AGENDA ---------------- */
+  /* ---------------- AGENDA ----------------
+     La agenda muestra estos eventos MÁS las evaluaciones. Cuando un evento y
+     una evaluación son la misma cosa (la Feria Científica es a la vez actividad
+     y evaluación) se les pone el mismo `ref` y la agenda muestra solo el evento.
+     No se deduplica por fecha+curso: el 28 de agosto conviven el Jeans Day y una
+     prueba de Ciencias, que son cosas distintas. */
   eventos: [
     {
       fecha: '2026-08-28',
@@ -35,6 +40,7 @@ const PORTAL = {
     },
     {
       fecha: '2026-09-01',
+      ref: 'feria-cientifica',
       curso: 'cuartob',
       titulo: 'Feria Científica',
       tipo: 'Actividad evaluada',
@@ -63,6 +69,7 @@ const PORTAL = {
     },
     {
       fecha: '2026-10-14',
+      ref: 'english-day-kinder',
       curso: 'kinder',
       titulo: 'English Day — ciclo Rilan',
       tipo: 'Presentación',
@@ -199,10 +206,10 @@ const PORTAL = {
     items: [
       { fecha: '2026-08-27', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Prueba de lectura: "El túnel"', formato: 'Prueba escrita', estado: 'proxima', detalle: 'El calendario la tenía como jornada doble con Inglés, pero esa prueba se movió al 2 de septiembre: el 27 queda solo con Lenguaje.', origen: 'Calendario 4°B' },
       { fecha: '2026-08-28', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Propiedades de la materia', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Características y propiedades fundamentales de la materia.', origen: 'Calendario 4°B' },
-      { fecha: '2026-09-01', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Feria Científica', formato: 'Maqueta, afiche y exposición oral', estado: 'proxima', detalle: 'Investigación de un sistema, elaboración de maqueta y afiche, exposición oral con vocabulario científico. Reprogramada desde el 5 de agosto.', origen: 'Calendario 4°B + correo del 10-08-2026' },
+      { fecha: '2026-09-01', ref: 'feria-cientifica', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Feria Científica', formato: 'Maqueta, afiche y exposición oral', estado: 'proxima', detalle: 'Investigación de un sistema, elaboración de maqueta y afiche, exposición oral con vocabulario científico. Reprogramada desde el 5 de agosto.', origen: 'Calendario 4°B + correo del 10-08-2026' },
       { fecha: '2026-09-02', curso: 'cuartob', asignatura: 'Inglés', titulo: 'Book 2: "The Skateboarder"', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Es la prueba que el calendario del II semestre listaba como "Book 2" para el 27 de agosto. La profesora de Inglés la reprogramó para el miércoles 2 de septiembre.', origen: 'Patricia Alvarado, profesora de Inglés' },
       { fecha: '2026-10-13', curso: 'cuartob', asignatura: 'Matemática', titulo: 'Unidad 4: Fracciones y decimales', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Fracciones, números decimales y notación científica.', origen: 'Calendario 4°B' },
-      { fecha: '2026-10-14', curso: 'kinder', asignatura: 'Inglés', titulo: 'Obra "Are you my mom?" — English Day', formato: 'Presentación en grupo', estado: 'proxima', detalle: 'Se han hecho ensayos en clases. Requiere caracterización según el rol asignado.', origen: 'Correo de Cynthia Argandoña · 12-08-2026' },
+      { fecha: '2026-10-14', ref: 'english-day-kinder', curso: 'kinder', asignatura: 'Inglés', titulo: 'Obra "Are you my mom?" — English Day', formato: 'Presentación en grupo', estado: 'proxima', detalle: 'Se han hecho ensayos en clases. Requiere caracterización según el rol asignado.', origen: 'Correo de Cynthia Argandoña · 12-08-2026' },
       { fecha: '2026-10-15', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Unidad 3', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Jornada de doble evaluación junto con Inglés.', origen: 'Calendario 4°B' },
       { fecha: '2026-10-15', curso: 'cuartob', asignatura: 'Inglés', titulo: 'Unidad "Health Matters"', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Jornada de doble evaluación junto con Lenguaje.', origen: 'Calendario 4°B' },
       { fecha: '2026-10-19', curso: 'cuartob', asignatura: 'Historia, Geografía y C. Sociales', titulo: 'Civilización Inca', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Enfocada exclusivamente en la civilización Inca.', origen: 'Calendario 4°B' },
