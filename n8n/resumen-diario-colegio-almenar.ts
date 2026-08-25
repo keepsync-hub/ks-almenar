@@ -204,47 +204,80 @@ const enviarResumen = node({
 });
 
 const leerAuto = node({
-  type: 'n8n-nodes-base.httpRequest',
-  version: 4.5,
+  type: 'n8n-nodes-base.github',
+  version: 1.1,
   config: {
-    name: 'Leer auto.js publicado',
+    name: 'Leer auto.js del repo',
     executeOnce: true,
     parameters: {
-      method: 'GET',
-      url: 'https://raw.githubusercontent.com/keepsync-hub/ks-almenar/main/docs/auto.js',
-      sendQuery: true,
-      specifyQuery: 'keypair',
-      queryParameters: { parameters: [{ name: 'cb', value: expr('{{ $now.toMillis() }}') }] },
-      options: {
-        response: { response: { fullResponse: true, neverError: true, responseFormat: 'text', outputPropertyName: 'contenido' } },
-        timeout: 20000
-      }
+      resource: 'file',
+      operation: 'get',
+      authentication: 'oAuth2',
+      owner: { __rl: true, mode: 'name', value: 'keepsync-hub' },
+      repository: { __rl: true, mode: 'name', value: 'ks-almenar' },
+      filePath: 'docs/auto.js',
+      asBinaryProperty: false,
+      additionalParameters: { reference: 'main' }
     },
+    credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
     position: [660, 420]
   },
-  output: [{ statusCode: 200, body: 'const PORTAL_AUTO = { "generado": null, "eventos": [] };' }]
+  output: [{ name: 'auto.js', path: 'docs/auto.js', sha: '5660bc7', content: 'Y29uc3QgUE9SVEFMX0FVVE8gPSB7fTsK', encoding: 'base64' }]
 });
 
 const leerData = node({
-  type: 'n8n-nodes-base.httpRequest',
-  version: 4.5,
+  type: 'n8n-nodes-base.github',
+  version: 1.1,
   config: {
-    name: 'Leer data.js publicado',
+    name: 'Leer data.js del repo',
     executeOnce: true,
     parameters: {
-      method: 'GET',
-      url: 'https://raw.githubusercontent.com/keepsync-hub/ks-almenar/main/docs/data.js',
-      sendQuery: true,
-      specifyQuery: 'keypair',
-      queryParameters: { parameters: [{ name: 'cb', value: expr('{{ $now.toMillis() }}') }] },
-      options: {
-        response: { response: { fullResponse: true, neverError: true, responseFormat: 'text', outputPropertyName: 'contenido' } },
-        timeout: 20000
-      }
+      resource: 'file',
+      operation: 'get',
+      authentication: 'oAuth2',
+      owner: { __rl: true, mode: 'name', value: 'keepsync-hub' },
+      repository: { __rl: true, mode: 'name', value: 'ks-almenar' },
+      filePath: 'docs/data.js',
+      asBinaryProperty: false,
+      additionalParameters: { reference: 'main' }
     },
-    position: [770, 540]
+    credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
+    position: [790, 540]
   },
-  output: [{ statusCode: 200, body: 'const PORTAL = { eventos: [] };' }]
+  output: [{ name: 'data.js', path: 'docs/data.js', sha: 'aa11bb2', content: 'Y29uc3QgUE9SVEFMID0ge307Cg==', encoding: 'base64' }]
+});
+
+const prepararContexto = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Preparar contexto del portal',
+    parameters: {
+      mode: 'runOnceForAllItems',
+      language: 'javaScript',
+      jsCode:
+        '// La API de GitHub devuelve el contenido en base64.\n' +
+        'function decodificar(b64) {\n' +
+        '  const limpio = String(b64 || "").replace(/\\s+/g, "");\n' +
+        '  if (!limpio) { return ""; }\n' +
+        '  if (typeof Buffer !== "undefined") {\n' +
+        '    return Buffer.from(limpio, "base64").toString("utf8");\n' +
+        '  }\n' +
+        '  return decodeURIComponent(escape(atob(limpio)));\n' +
+        '}\n' +
+        '\n' +
+        'const auto = $("Leer auto.js del repo").first().json;\n' +
+        'const data = $("Leer data.js del repo").first().json;\n' +
+        '\n' +
+        'return [{ json: {\n' +
+        '  autoTexto: decodificar(auto.content),\n' +
+        '  autoSha: auto.sha || "",\n' +
+        '  dataTexto: decodificar(data.content)\n' +
+        '} }];'
+    },
+    position: [920, 420]
+  },
+  output: [{ autoTexto: 'const PORTAL_AUTO = {};', autoSha: '5660bc7', dataTexto: 'const PORTAL = {};' }]
 });
 
 const modeloExtractor = languageModel({
@@ -299,10 +332,10 @@ const extraerNovedades = node({
         'Lo que sigue ya esta en el portal. Si una actividad, recordatorio o evaluacion ya aparece aca, NO la incluyas en tu respuesta, AUNQUE en el correo este redactada de otra forma. Compara por el hecho concreto (misma actividad, misma fecha, misma tarea), no por las palabras.\n' +
         '\n' +
         '--- Contenido curado a mano (data.js) ---\n' +
-        '{{ $("Leer data.js publicado").first().json.body ?? $("Leer data.js publicado").first().json.contenido ?? "" }}\n' +
+        '{{ $("Preparar contexto del portal").first().json.dataTexto }}\n' +
         '\n' +
         '--- Novedades detectadas en dias anteriores (auto.js) ---\n' +
-        '{{ $("Leer auto.js publicado").first().json.body ?? $("Leer auto.js publicado").first().json.contenido ?? "" }}\n' +
+        '{{ $("Preparar contexto del portal").first().json.autoTexto }}\n' +
         '\n' +
         '=== CORREOS DE HOY ===\n' +
         '\n' +
@@ -387,17 +420,10 @@ const fusionarNovedades = node({
         '  return salida;\n' +
         '}\n' +
         '\n' +
-        'const resp = $("Leer auto.js publicado").first().json;\n' +
-        'const status = resp.statusCode !== undefined ? Number(resp.statusCode) : 200;\n' +
+        'const crudo = $("Preparar contexto del portal").first().json.autoTexto;\n' +
         '\n' +
-        'let crudo = "";\n' +
-        'if (typeof resp.contenido === "string") { crudo = resp.contenido; }\n' +
-        'else if (typeof resp.body === "string") { crudo = resp.body; }\n' +
-        'else if (resp.body && typeof resp.body.contenido === "string") { crudo = resp.body.contenido; }\n' +
-        'else if (typeof resp.data === "string") { crudo = resp.data; }\n' +
-        '\n' +
-        'if (status !== 200 || !crudo) {\n' +
-        '  return [{ json: { cambio: false, motivo: "No se pudo leer auto.js (status " + status + "). No se escribe nada." } }];\n' +
+        'if (!crudo) {\n' +
+        '  return [{ json: { cambio: false, motivo: "No se pudo leer auto.js del repo. No se escribe nada." } }];\n' +
         '}\n' +
         '\n' +
         'let previo = null;\n' +
@@ -516,6 +542,7 @@ export default workflow('resumen-colegio-almenar', 'Resumen diario correos Coleg
   .add(prepararCorreos)
   .to(leerAuto)
   .to(leerData)
+  .to(prepararContexto)
   .to(extraerNovedades)
   .to(fusionarNovedades)
   .to(soloSiHayCambios)
