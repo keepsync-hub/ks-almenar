@@ -100,6 +100,30 @@
     return salida;
   }
 
+  // Una evaluación con el mismo `ref` que un evento es la misma cosa (la Feria
+  // Científica es actividad y evaluación a la vez): en la agenda se muestra solo
+  // el evento. Sin `ref`, la evaluación se muestra por derecho propio.
+  function evaluacionesFueraDeAgenda(eventos, evaluaciones) {
+    var refs = {};
+    (eventos || []).forEach(function (e) { if (e.ref) { refs[e.ref] = true; } });
+    return (evaluaciones || []).filter(function (ev) { return !(ev.ref && refs[ev.ref]); });
+  }
+
+  // Una evaluación pintada con la forma de una tarjeta de agenda.
+  function comoEvento(ev) {
+    return {
+      fecha: ev.fecha,
+      curso: ev.curso,
+      titulo: ev.asignatura + ' — ' + ev.titulo,
+      tipo: 'Evaluación',
+      detalle: ev.detalle || ev.formato || '',
+      accion: null,
+      origen: ev.origen,
+      esEvaluacion: true,
+      realizada: ev.estado === 'realizada'
+    };
+  }
+
   var AUTO = (typeof PORTAL_AUTO !== 'undefined' && PORTAL_AUTO) ? PORTAL_AUTO : {};
   var EVENTOS       = fusionar(PORTAL.eventos, AUTO.eventos);
   var RECORDATORIOS = fusionar(PORTAL.recordatorios, AUTO.recordatorios);
@@ -148,7 +172,7 @@
         lista.push({ fecha: ev.fecha, titulo: ev.titulo, curso: ev.curso, clase: ev.tipo, hora: ev.hora || null });
       }
     });
-    EVALUACIONES.forEach(function (ev) {
+    evaluacionesFueraDeAgenda(EVENTOS, EVALUACIONES).forEach(function (ev) {
       if (ev.fecha && visible(ev.curso) && ev.estado !== 'realizada' && diasHasta(ev.fecha) >= 0) {
         lista.push({ fecha: ev.fecha, titulo: ev.asignatura + ': ' + ev.titulo, curso: ev.curso, clase: 'Evaluación', hora: null });
       }
@@ -219,6 +243,11 @@
     chips.appendChild(chipCurso(ev.curso));
     chips.appendChild(el('span', 'chip', ev.tipo));
     if (ev.auto) { chips.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
+    if (ev.esEvaluacion && !pasado) {
+      var enlace = el('a', 'chip chip--menta', 'Planificar estudio');
+      enlace.href = '#evaluaciones';
+      chips.appendChild(enlace);
+    }
     if (dias !== null && dias >= 0 && dias <= 7) {
       chips.appendChild(el('span', 'chip chip--rosa', dias === 0 ? 'Es hoy' : 'En ' + dias + (dias === 1 ? ' día' : ' días')));
     }
@@ -251,11 +280,16 @@
     return li;
   }
 
+  function agendaCompleta() {
+    var evaluaciones = evaluacionesFueraDeAgenda(EVENTOS, EVALUACIONES).map(comoEvento);
+    return EVENTOS.concat(evaluaciones);
+  }
+
   function pintarAgenda() {
     var cont = document.getElementById('listaAgenda');
     vaciar(cont);
 
-    var items = EVENTOS.filter(function (ev) { return visible(ev.curso); });
+    var items = agendaCompleta().filter(function (ev) { return visible(ev.curso); });
 
     var futuros = items
       .filter(function (ev) { return ev.fecha && diasHasta(ev.fecha) >= 0; })
