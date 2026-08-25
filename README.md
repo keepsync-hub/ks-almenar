@@ -19,11 +19,14 @@ En **Settings → Pages** del repositorio:
 
 Queda en `https://keepsync-hub.github.io/ks-almenar/`.
 
-> **Antes de publicar, leer la sección 10 de
-> [BUENAS-PRACTICAS-PORTAL.md](./BUENAS-PRACTICAS-PORTAL.md).** El repositorio es
-> público y el portal contiene nombres de niños y profesoras. La página lleva
-> `noindex` y un `robots.txt` restrictivo, pero eso evita la indexación, no el
-> acceso. Lo recomendable es repo privado, o despersonalizar `docs/data.js`.
+El portal es público a propósito: está pensado para compartirse por enlace con los
+demás apoderados de Kínder A y 4° B. Lleva `noindex` y un `robots.txt` restrictivo,
+así que se comparte por URL pero no aparece en buscadores.
+
+> **Criterio de contenido:** solo va lo que las profesoras enviaron a todo el curso.
+> Los correos dirigidos a una familia en particular (rúbricas individuales,
+> reconocimientos personales) quedan fuera. Detalle en la sección 10 de
+> [BUENAS-PRACTICAS-PORTAL.md](./BUENAS-PRACTICAS-PORTAL.md).
 
 ## Actualizar la agenda
 

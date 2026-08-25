@@ -325,3 +325,23 @@ tr.evaluacion--realizada td { opacity: 0.6; }
   white-space: nowrap;
   border: 0;
 }
+
+/* Hora y lugar de un evento */
+.evento__cuando {
+  display: inline-block;
+  border: var(--borde-fino);
+  background: var(--celeste);
+  padding: 4px 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: calc(var(--paso) * 1.5);
+}
+
+/* Aclaración sobre un dato que cambió o que falta */
+.evento__nota {
+  border-left: 6px solid var(--tinta);
+  background: var(--papel-hueso);
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin-bottom: calc(var(--paso) * 1.5);
+}

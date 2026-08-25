@@ -134,25 +134,34 @@ mínimo cómodo en móvil es 44px. Toda la fila es clickeable porque está envue
 en un `<label>`, así que en la práctica funciona, pero subir la casilla a 44px
 sería mejor.
 
-## 10. Privacidad: la decisión más importante y no es de diseño visual
+## 10. Privacidad: decidido que el portal es público y compartido
 
-**El repositorio `keepsync-hub/ks-almenar` es público.** Una GitHub Page publicada
-desde ahí queda accesible para cualquiera que tenga la URL, y el portal contiene
-nombres de niños, cursos, nombres de profesoras y actividades con fecha y lugar.
+El repositorio `keepsync-hub/ks-almenar` es público, y la decisión tomada es
+mantenerlo así: el portal se comparte con los demás apoderados de Kínder A y 4° B.
+Eso cambia quién es la audiencia, y por lo tanto qué corresponde publicar.
 
-Mitigaciones ya aplicadas:
-- `<meta name="robots" content="noindex, nofollow">` en la página.
-- `docs/robots.txt` con `Disallow: /`.
+Consecuencias aplicadas al contenido:
 
-Ambas evitan la indexación en buscadores, pero **no** hacen la página privada.
-Opciones reales, de más a menos protectora:
+- **Las etiquetas son por curso, no por hijo.** Los chips dicen "Kínder A" y
+  "4° B", no "Kínder A · Agustín". Si el portal lo lee el curso completo, rotular
+  por hijo propio es a la vez raro y una exposición innecesaria.
+- **Fuera los registros individuales.** El correo con la rúbrica y las
+  observaciones de la disertación de un alumno, y el documento de reconocimiento
+  personal de otra alumna, **no** están en el portal. Son información de esa
+  familia, no del curso. Este es el criterio general: si un dato identifica el
+  desempeño o la situación particular de un niño, no va.
+- **Se mantiene `noindex` y `robots.txt`.** Compartible por enlace no es lo mismo
+  que indexable en Google. Si algún día se quiere que aparezca en buscadores, se
+  quitan esas dos líneas; mientras tanto el portal circula entre quienes reciben
+  la URL.
 
-1. **Repo privado + GitHub Pages** (requiere plan Pro/Team). La opción correcta.
-2. Mover el portal a un hosting con contraseña.
-3. Dejarlo público pero despersonalizado: reemplazar nombres por "Hijo 1" / "Hijo 2"
-   y quitar apellidos y nombres de profesoras. Se hace editando solo `data.js`.
+Lo que sí queda publicado: actividades del curso, fechas, evaluaciones, materiales
+pedidos y recordatorios generales — todo lo que las profesoras ya enviaron a
+todas las familias del curso por correo.
 
-Mi recomendación es la 1. Si no es viable, la 3 es un cambio de cinco minutos.
+**Regla para quien mantenga esto:** antes de agregar algo a `data.js`, preguntarse
+si la profesora lo mandó a todo el curso o solo a una familia. Si fue solo a una
+familia, no va.
 
 ## 11. Cero build, cero dependencias
 

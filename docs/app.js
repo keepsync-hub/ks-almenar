@@ -57,7 +57,7 @@
   function chipCurso(claveCurso) {
     var c = PORTAL.cursos[claveCurso];
     if (!c) { return el('span', 'chip', 'Sin curso'); }
-    return el('span', 'chip chip--' + c.tono, c.nombre + ' · ' + c.estudiante);
+    return el('span', 'chip chip--' + c.tono, c.nombre);
   }
 
   function visible(claveCurso) {
@@ -98,14 +98,29 @@
 
   /* ---------- cuenta regresiva ---------- */
 
+  // Lo que viene incluye actividades Y evaluaciones: si la prueba del jueves es
+  // lo mas cercano, tiene que salir arriba aunque viva en otra seccion.
+  function proximosCombinados(limite) {
+    var lista = [];
+    PORTAL.eventos.forEach(function (ev) {
+      if (ev.fecha && visible(ev.curso) && diasHasta(ev.fecha) >= 0) {
+        lista.push({ fecha: ev.fecha, titulo: ev.titulo, curso: ev.curso, clase: ev.tipo, hora: ev.hora || null });
+      }
+    });
+    PORTAL.evaluaciones.items.forEach(function (ev) {
+      if (ev.fecha && visible(ev.curso) && ev.estado !== 'realizada' && diasHasta(ev.fecha) >= 0) {
+        lista.push({ fecha: ev.fecha, titulo: ev.asignatura + ': ' + ev.titulo, curso: ev.curso, clase: 'Evaluación', hora: null });
+      }
+    });
+    lista.sort(function (a, b) { return aFecha(a.fecha) - aFecha(b.fecha); });
+    return lista.slice(0, limite);
+  }
+
   function pintarRegresiva() {
     var cont = document.getElementById('listaRegresiva');
     vaciar(cont);
 
-    var proximos = PORTAL.eventos
-      .filter(function (ev) { return ev.fecha && visible(ev.curso) && diasHasta(ev.fecha) >= 0; })
-      .sort(function (a, b) { return aFecha(a.fecha) - aFecha(b.fecha); })
-      .slice(0, 3);
+    var proximos = proximosCombinados(4);
 
     if (!proximos.length) {
       cont.appendChild(el('div', 'vacio', 'No hay actividades próximas para este filtro.'));
@@ -123,8 +138,12 @@
       tarjeta.appendChild(el('div', 'regresiva__dias', etiqueta.numero));
       if (etiqueta.unidad) { tarjeta.appendChild(el('div', 'regresiva__unidad', etiqueta.unidad)); }
       tarjeta.appendChild(el('div', 'regresiva__titulo', ev.titulo));
-      tarjeta.appendChild(el('div', 'regresiva__fecha', fechaLarga(ev.fecha)));
-      tarjeta.appendChild(chipCurso(ev.curso));
+      tarjeta.appendChild(el('div', 'regresiva__fecha', fechaLarga(ev.fecha) + (ev.hora ? ' · ' + ev.hora : '')));
+
+      var chipsR = el('div', 'evento__chips');
+      chipsR.appendChild(chipCurso(ev.curso));
+      chipsR.appendChild(el('span', 'chip', ev.clase));
+      tarjeta.appendChild(chipsR);
 
       cont.appendChild(tarjeta);
     });
@@ -164,7 +183,19 @@
     cuerpo.appendChild(chips);
 
     cuerpo.appendChild(el('h3', 'evento__titulo', ev.titulo));
+
+    if (ev.hora || ev.lugar) {
+      var cuando = [];
+      if (ev.hora)  { cuando.push(ev.hora); }
+      if (ev.lugar) { cuando.push(ev.lugar); }
+      cuerpo.appendChild(el('div', 'evento__cuando', cuando.join(' · ')));
+    }
+
     cuerpo.appendChild(el('p', 'evento__detalle', ev.detalle));
+
+    if (ev.nota) {
+      cuerpo.appendChild(el('div', 'evento__nota', 'Ojo: ' + ev.nota));
+    }
 
     if (ev.accion && !pasado) {
       cuerpo.appendChild(el('div', 'evento__accion', '→ ' + ev.accion));
@@ -288,6 +319,10 @@
     p.appendChild(document.createTextNode('.'));
     cont.appendChild(p);
 
+    if (f.advertencia) {
+      cont.appendChild(el('div', 'evento__nota', f.advertencia));
+    }
+
     cont.appendChild(el('div', 'evento__origen', 'Fuente: ' + f.origen));
   }
 
@@ -365,6 +400,8 @@
       'Hoy: ' + SEMANA[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()] + '. ' + d.getFullYear();
     document.getElementById('placaActualizado').textContent =
       'Datos al ' + fechaLarga(PORTAL.actualizado);
+    var ventana = document.getElementById('placaVentana');
+    if (ventana && PORTAL.ventanaRevisada) { ventana.textContent = PORTAL.ventanaRevisada; }
   }
 
   function pintarTodo() {
