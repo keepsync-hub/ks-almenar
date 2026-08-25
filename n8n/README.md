@@ -29,25 +29,28 @@ Una vez al día revisa la casilla de Gmail y resume los correos del colegio.
 
 Por cada curso: **Temas más importantes**, **Compromisos**, **Fechas clave** (dd-mm-aaaa) y **Acciones a realizar** (verbo + plazo). Lo urgente para hoy o mañana se marca con el prefijo `URGENTE:`. Si un curso no tuvo correos, aparece como "Sin novedades".
 
-### Estado: inactivo, bloqueado por credencial
+### Estado: activo desde el 25-08-2026
 
-**No activar hasta resolver esto.** Verificado el 25-08-2026 con un workflow de diagnóstico (ejecución `398`, ya archivado): la credencial `Gmail OAuth2 API` (`cYhcyiH1LcyrXUWz`) está conectada a **cristian.molina@keepsync.ai**, no a cristian0907@gmail.com. Los tres mensajes muestreados traían `Delivered-To: cristian.molina@keepsync.ai`.
+Publicado y validado de punta a punta (ejecución manual `400`): encontró 3 correos, los clasificó, generó el resumen y envió el mail (`1a03932f124affff`).
 
-Es la única credencial de Gmail en la instancia, y n8n Credits no está habilitado, así que no hay otra a la que apuntar.
+### Credenciales: cuidado, hay dos de Gmail
 
-Pasos para desbloquear:
+La instancia tiene **dos** credenciales `gmailOAuth2` y apuntan a casillas distintas. Verificado con workflows de diagnóstico leyendo la cabecera `Delivered-To` (ejecuciones `398` y `399`, ambos workflows ya archivados):
 
-1. En n8n: **Credentials → Create credential → Gmail OAuth2 API**.
-2. **Sign in with Google** con **cristian0907@gmail.com** (verificar qué sesión de Google está activa en el navegador — es el punto donde se suele conectar la cuenta equivocada).
-3. Reapuntar a esa credencial los nodos `Buscar correos del colegio` y `Enviar resumen por correo`.
-4. Activar el workflow.
+| Credencial | ID | Cuenta real | Uso |
+| --- | --- | --- | --- |
+| `Gmail account` | `o7zgkcSK3TETNTZv` | **cristian0907@gmail.com** | La que usa este workflow |
+| `Gmail OAuth2 API` | `cYhcyiH1LcyrXUWz` | cristian.molina@keepsync.ai | **No usar acá** |
+
+El nombre de la credencial no dice a qué cuenta apunta. Si alguna vez hay dudas, la forma de comprobarlo es leer un par de mensajes con `simple: false` y mirar `headers['delivered-to']`.
 
 ### Notas de operación
 
 - La ventana de búsqueda es de 26 h (no 24 h) para dar solapamiento y no perder correos si una ejecución se atrasa.
 - Si no llegó ningún correo de esos dos remitentes, el workflow termina sin enviar nada.
 - El cuerpo de cada correo se trunca a 4.000 caracteres antes de mandarlo al modelo.
-- Credenciales usadas: `Gmail OAuth2 API` (`cYhcyiH1LcyrXUWz`, **pendiente de reemplazo**) y `OpenRouter account` (`bZDl6rzCKZZQsTQX`, correcta).
+- Credenciales usadas: `Gmail account` (`o7zgkcSK3TETNTZv`) y `OpenRouter account` (`bZDl6rzCKZZQsTQX`).
+- Modelo: `anthropic/claude-sonnet-4.6` vía OpenRouter, temperatura 0.2. La corrida de validación consumió ~3.500 tokens con 3 correos.
 
 ### Cómo cambiar cosas
 

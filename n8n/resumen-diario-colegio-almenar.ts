@@ -34,7 +34,7 @@ const buscarCorreos = node({
       },
       options: { downloadAttachments: false }
     },
-    credentials: { gmailOAuth2: { id: 'cYhcyiH1LcyrXUWz', name: 'Gmail OAuth2 API' } },
+    credentials: { gmailOAuth2: { id: 'o7zgkcSK3TETNTZv', name: 'Gmail account' } },
     position: [220, 0]
   },
   output: [
@@ -197,7 +197,7 @@ const enviarResumen = node({
       ),
       options: { appendAttribution: false, senderName: 'Resumen Colegio Almenar' }
     },
-    credentials: { gmailOAuth2: { id: 'cYhcyiH1LcyrXUWz', name: 'Gmail OAuth2 API' } },
+    credentials: { gmailOAuth2: { id: 'o7zgkcSK3TETNTZv', name: 'Gmail account' } },
     position: [880, 0]
   },
   output: [{ id: '19a2b3c4d5e6f708', threadId: '19a2b3c4d5e6f708', labelIds: ['SENT'] }]
@@ -208,7 +208,11 @@ const notaConfiguracion = sticky(
   'Corre todos los dias a las 07:00 (zona horaria America/Santiago, definida en Settings del workflow).\n\n' +
   'Busca en Gmail los correos de **cynthiaargandona@almenar.cl** (Kinder A - Agustin) y **franbravo@almenar.cl** (4to B - Olivia) recibidos en las ultimas 26 horas, los resume con IA y envia el resultado a cristian0907@gmail.com.\n\n' +
   'Si no llego ningun correo de esos remitentes, el workflow termina sin enviar nada.\n\n' +
-  'Para cambiar la hora, edita el Schedule Trigger. Para cambiar el destinatario, edita el campo "To" del ultimo nodo.',
+  '### Credencial\n' +
+  'Usa **Gmail account** (`o7zgkcSK3TETNTZv`), verificada el 25-08-2026 como cristian0907@gmail.com.\n\n' +
+  'OJO: la otra credencial de la instancia, `Gmail OAuth2 API`, apunta a cristian.molina@keepsync.ai. No usarla aqui.\n\n' +
+  '### Ajustes\n' +
+  'Hora: Schedule Trigger. Destinatario: campo "To" del ultimo nodo. Remitentes vigilados: parametro Search del nodo de busqueda.',
   [revisarDiario, buscarCorreos],
   { color: 4 }
 );
