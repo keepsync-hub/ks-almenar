@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal Almenar · Agenda y recordatorios</title>
+<meta name="description" content="Agenda, actividades próximas, recordatorios y evaluaciones de Kínder A y 4° B del Colegio Almenar.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFE45C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23FFE45C' stroke='%2316130F' stroke-width='10'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='sans-serif' font-weight='bold'>A</text></svg>">
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="envoltura">
+    <div class="cabecera__marca">
+      <h1>Portal Almenar</h1>
+    </div>
+    <p class="cabecera__sub">Agenda, actividades próximas, recordatorios y evaluaciones de Kínder A y 4° B.</p>
+    <div class="cabecera__meta">
+      <span class="placa" id="placaHoy">—</span>
+      <span class="placa" id="placaActualizado">—</span>
+      <span class="placa" id="placaVentana">—</span>
+    </div>
+  </div>
+</header>
+
+<nav class="navegacion" aria-label="Secciones del portal">
+  <div class="envoltura">
+    <ul class="navegacion__lista">
+      <li><a href="#proximo">Lo próximo</a></li>
+      <li><a href="#agenda">Agenda</a></li>
+      <li><a href="#recordatorios">Recordatorios</a></li>
+      <li><a href="#evaluaciones">Evaluaciones</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="envoltura">
+
+  <div class="filtro" role="group" aria-label="Filtrar por curso">
+    <span class="filtro__etiqueta">Ver:</span>
+    <button class="filtro__boton" type="button" data-curso="todos"   aria-pressed="true">Todos</button>
+    <button class="filtro__boton" type="button" data-curso="kinder"  aria-pressed="false">Kínder A</button>
+    <button class="filtro__boton" type="button" data-curso="cuartob" aria-pressed="false">4° B</button>
+  </div>
+
+  <p class="visually-hidden" aria-live="polite" id="anuncioFiltro"></p>
+
+  <section class="seccion" id="proximo" aria-labelledby="tituloProximo">
+    <div class="seccion__encabezado">
+      <h2 id="tituloProximo">Lo próximo</h2>
+    </div>
+    <div class="regresiva" id="listaRegresiva"></div>
+  </section>
+
+  <section class="seccion" id="agenda" aria-labelledby="tituloAgenda">
+    <div class="seccion__encabezado">
+      <h2 id="tituloAgenda">Agenda</h2>
+      <span class="seccion__conteo" id="conteoAgenda">0</span>
+    </div>
+    <p class="seccion__nota">Actividades confirmadas por las profesoras jefe. Lo que ya pasó queda atenuado al final.</p>
+    <ul class="lista" id="listaAgenda"></ul>
+  </section>
+
+  <section class="seccion" id="recordatorios" aria-labelledby="tituloRecordatorios">
+    <div class="seccion__encabezado">
+      <h2 id="tituloRecordatorios">Recordatorios</h2>
+      <span class="seccion__conteo" id="conteoRecordatorios">0</span>
+    </div>
+    <p class="seccion__nota">Lo que hay que hacer en casa. Marcar una casilla la guarda solo en este navegador, no se comparte con nadie.</p>
+    <ul class="lista" id="listaRecordatorios"></ul>
+  </section>
+
+  <section class="seccion" id="evaluaciones" aria-labelledby="tituloEvaluaciones">
+    <div class="seccion__encabezado">
+      <h2 id="tituloEvaluaciones">Evaluaciones</h2>
+      <span class="seccion__conteo" id="conteoEvaluaciones">0</span>
+    </div>
+
+    <div class="fuente" id="fuenteOficial"></div>
+
+    <div class="tabla-envoltura">
+      <table>
+        <caption>Evaluaciones y presentaciones mencionadas en los correos</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Curso</th>
+            <th scope="col">Asignatura</th>
+            <th scope="col">Evaluación</th>
+            <th scope="col">Formato</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoEvaluaciones"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pie envoltura">
+  <div class="pie__aviso">
+    <strong>Este portal no reemplaza a Lirmi ni a la agenda escolar.</strong>
+    Recoge lo que llegó por correo de las profesoras jefe. Ante cualquier diferencia, mandan Lirmi y la agenda.
+  </div>
+  <p>
+    Contenido generado a partir de los correos y adjuntos de <strong>Cynthia Argandoña</strong> (Kínder A) y
+    <strong>Francisca Bravo</strong> (4° B). El calendario de evaluaciones de 4° B viene transcrito del adjunto
+    que envió la profesora jefe. Para actualizarlo se edita <code>docs/data.js</code>.
+  </p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

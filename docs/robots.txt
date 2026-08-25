@@ -1,0 +1,3 @@
+# Portal familiar. No se quiere indexación en buscadores.
+User-agent: *
+Disallow: /

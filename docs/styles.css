@@ -1,0 +1,347 @@
+/* =========================================================
+   Portal Almenar — sistema neo-brutalista en clave clara
+   Reglas del sistema:
+   - Borde negro de 3px en TODO lo que sea un objeto.
+   - Sombra dura sin difuminar (6px 6px 0). Nunca blur.
+   - Radio 0. La única curva permitida es en los chips (999px).
+   - Color plano de fondo. Nada de degradados.
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* Base */
+  --papel:        #FDFCF7;
+  --papel-hueso:  #F4F1E6;
+  --tinta:        #16130F;
+  --tinta-suave:  #55504A;
+
+  /* Acentos claros */
+  --amarillo:     #FFE45C;
+  --celeste:      #A5D8FF;
+  --menta:        #A7E8C4;
+  --rosa:         #FFB3B3;
+  --durazno:      #FFD8A8;
+  --lila:         #D8C9FF;
+
+  /* Sistema */
+  --borde:        3px solid var(--tinta);
+  --borde-fino:   2px solid var(--tinta);
+  --sombra:       6px 6px 0 var(--tinta);
+  --sombra-sm:    4px 4px 0 var(--tinta);
+  --sombra-lg:    10px 10px 0 var(--tinta);
+
+  --paso: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  background-image:
+    linear-gradient(var(--papel-hueso) 1px, transparent 1px),
+    linear-gradient(90deg, var(--papel-hueso) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--tinta);
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { line-height: 1.05; margin: 0; text-transform: uppercase; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2rem, 6vw, 3.4rem); font-weight: 700; }
+h2 { font-size: clamp(1.4rem, 3.6vw, 2.1rem); font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0; text-transform: none; }
+p  { margin: 0 0 calc(var(--paso) * 1.5); }
+a  { color: var(--tinta); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* Foco siempre visible y grueso: el estilo no puede comerse la accesibilidad */
+:focus-visible {
+  outline: 4px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+.envoltura { max-width: 1100px; margin: 0 auto; padding: 0 calc(var(--paso) * 2); }
+
+/* ---------------- Encabezado ---------------- */
+.cabecera {
+  border-bottom: var(--borde);
+  background: var(--amarillo);
+  padding: calc(var(--paso) * 4) 0 calc(var(--paso) * 3);
+}
+.cabecera__marca { display: flex; align-items: baseline; gap: var(--paso); flex-wrap: wrap; }
+.cabecera__sub { margin: var(--paso) 0 0; font-weight: 500; max-width: 60ch; }
+.cabecera__meta {
+  margin-top: calc(var(--paso) * 2);
+  display: flex; gap: var(--paso); flex-wrap: wrap; align-items: center;
+}
+
+.placa {
+  display: inline-block;
+  background: var(--papel);
+  border: var(--borde-fino);
+  box-shadow: var(--sombra-sm);
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---------------- Navegación ---------------- */
+.navegacion {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--papel);
+  border-bottom: var(--borde);
+}
+.navegacion__lista {
+  display: flex; gap: 0; list-style: none; margin: 0; padding: 0;
+  overflow-x: auto;
+}
+.navegacion__lista a {
+  display: block;
+  padding: 14px 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-right: var(--borde-fino);
+  white-space: nowrap;
+}
+.navegacion__lista a:hover { background: var(--amarillo); }
+
+/* ---------------- Filtro de curso ---------------- */
+.filtro {
+  display: flex; gap: var(--paso); flex-wrap: wrap; align-items: center;
+  padding: calc(var(--paso) * 2.5) 0;
+}
+.filtro__etiqueta { font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.06em; }
+.filtro__boton {
+  font: inherit; font-weight: 700;
+  cursor: pointer;
+  background: var(--papel);
+  border: var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 8px 16px;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.filtro__boton:hover { transform: translate(-2px, -2px); box-shadow: var(--sombra); }
+.filtro__boton:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--tinta); }
+.filtro__boton[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+
+/* ---------------- Secciones ---------------- */
+.seccion { padding: calc(var(--paso) * 5) 0; border-bottom: var(--borde); }
+.seccion__encabezado { display: flex; align-items: center; gap: calc(var(--paso) * 1.5); flex-wrap: wrap; margin-bottom: calc(var(--paso) * 3); }
+.seccion__conteo {
+  background: var(--tinta); color: var(--papel);
+  font-size: 0.8rem; font-weight: 700; padding: 4px 10px;
+}
+.seccion__nota { max-width: 65ch; color: var(--tinta-suave); font-size: 0.95rem; margin-top: calc(var(--paso) * -1.5); margin-bottom: calc(var(--paso) * 3); }
+
+/* ---------------- Cuenta regresiva ---------------- */
+.regresiva { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: calc(var(--paso) * 2.5); }
+.regresiva__tarjeta {
+  border: var(--borde);
+  box-shadow: var(--sombra-lg);
+  padding: calc(var(--paso) * 2.5);
+  background: var(--papel);
+  display: flex; flex-direction: column; gap: var(--paso);
+}
+.regresiva__dias { font-size: clamp(2.6rem, 8vw, 4rem); font-weight: 700; line-height: 0.9; letter-spacing: -0.04em; }
+.regresiva__unidad { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.regresiva__titulo { font-size: 1.15rem; font-weight: 700; }
+.regresiva__fecha { font-size: 0.9rem; font-weight: 500; }
+
+/* ---------------- Tarjetas de agenda ---------------- */
+.lista { display: grid; gap: calc(var(--paso) * 2.5); list-style: none; margin: 0; padding: 0; }
+
+.evento {
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  background: var(--papel);
+  display: grid;
+  grid-template-columns: 110px 1fr;
+}
+.evento__fecha {
+  border-right: var(--borde);
+  padding: calc(var(--paso) * 2);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+.evento__dia { font-size: 2.2rem; font-weight: 700; line-height: 0.9; }
+.evento__mes { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.evento__semana { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; }
+.evento__cuerpo { padding: calc(var(--paso) * 2.5); }
+.evento__titulo { margin-bottom: var(--paso); }
+.evento__detalle { font-size: 0.95rem; margin-bottom: calc(var(--paso) * 1.5); }
+.evento__chips { display: flex; gap: var(--paso); flex-wrap: wrap; margin-bottom: calc(var(--paso) * 1.5); }
+.evento__accion {
+  border: var(--borde-fino);
+  background: var(--menta);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-block;
+}
+.evento__origen { font-size: 0.78rem; color: var(--tinta-suave); margin-top: calc(var(--paso) * 1.5); }
+.evento--pasado { opacity: 0.55; }
+.evento--sinfecha .evento__fecha { background: var(--papel-hueso); }
+.evento--sinfecha .evento__dia { font-size: 1.6rem; }
+
+/* ---------------- Chips ---------------- */
+.chip {
+  display: inline-block;
+  border: var(--borde-fino);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--papel);
+}
+.chip--celeste  { background: var(--celeste); }
+.chip--amarillo { background: var(--amarillo); }
+.chip--menta    { background: var(--menta); }
+.chip--rosa     { background: var(--rosa); }
+.chip--durazno  { background: var(--durazno); }
+.chip--lila     { background: var(--lila); }
+
+/* ---------------- Recordatorios ---------------- */
+.recordatorio {
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  background: var(--papel);
+  padding: calc(var(--paso) * 2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: calc(var(--paso) * 2);
+  align-items: start;
+}
+.recordatorio--urgente { background: var(--rosa); }
+.recordatorio--alta    { background: var(--durazno); }
+.recordatorio__caja {
+  appearance: none;
+  width: 30px; height: 30px;
+  border: var(--borde);
+  background: var(--papel);
+  cursor: pointer;
+  display: grid; place-content: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+.recordatorio__caja::after {
+  content: '';
+  width: 16px; height: 9px;
+  border-left: 4px solid var(--tinta);
+  border-bottom: 4px solid var(--tinta);
+  transform: rotate(-45deg) translateY(-2px) scale(0);
+  transition: transform .12s ease;
+}
+.recordatorio__caja:checked { background: var(--menta); }
+.recordatorio__caja:checked::after { transform: rotate(-45deg) translateY(-2px) scale(1); }
+.recordatorio__texto { font-weight: 700; }
+.recordatorio__nota { font-size: 0.9rem; margin-top: 4px; }
+.recordatorio__origen { font-size: 0.78rem; color: var(--tinta-suave); margin-top: var(--paso); }
+.recordatorio__caja:checked ~ .recordatorio__contenido .recordatorio__texto {
+  text-decoration: line-through;
+  text-decoration-thickness: 3px;
+  opacity: 0.6;
+}
+.recordatorio__meta { display: flex; gap: var(--paso); flex-wrap: wrap; margin-top: var(--paso); }
+
+/* ---------------- Evaluaciones ---------------- */
+.fuente {
+  border: var(--borde);
+  box-shadow: var(--sombra);
+  background: var(--lila);
+  padding: calc(var(--paso) * 2.5);
+  margin-bottom: calc(var(--paso) * 3.5);
+}
+.fuente__titulo { margin-bottom: var(--paso); }
+
+.tabla-envoltura { overflow-x: auto; border: var(--borde); box-shadow: var(--sombra); background: var(--papel); }
+table { border-collapse: collapse; width: 100%; min-width: 720px; }
+caption { text-align: left; padding: calc(var(--paso) * 2); font-weight: 700; border-bottom: var(--borde); background: var(--papel-hueso); }
+th, td { padding: 14px 16px; text-align: left; border-bottom: var(--borde-fino); font-size: 0.92rem; vertical-align: top; }
+thead th { background: var(--celeste); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: var(--borde); }
+tbody tr:last-child td { border-bottom: none; }
+tr.evaluacion--realizada td { opacity: 0.6; }
+
+/* ---------------- Estado vacío ---------------- */
+.vacio {
+  border: 3px dashed var(--tinta);
+  padding: calc(var(--paso) * 4);
+  text-align: center;
+  font-weight: 700;
+  background: var(--papel-hueso);
+}
+
+/* ---------------- Pie ---------------- */
+.pie { padding: calc(var(--paso) * 5) 0; font-size: 0.88rem; }
+.pie__aviso {
+  border: var(--borde);
+  background: var(--durazno);
+  box-shadow: var(--sombra-sm);
+  padding: calc(var(--paso) * 2);
+  margin-bottom: calc(var(--paso) * 3);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 620px) {
+  body { font-size: 16px; }
+  .evento { grid-template-columns: 1fr; }
+  .evento__fecha {
+    border-right: none;
+    border-bottom: var(--borde);
+    flex-direction: row; gap: var(--paso); justify-content: flex-start;
+  }
+  .evento__dia { font-size: 1.6rem; }
+  :root { --sombra: 4px 4px 0 var(--tinta); --sombra-lg: 6px 6px 0 var(--tinta); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  .filtro__boton:hover { transform: none; }
+}
+
+@media print {
+  .navegacion, .filtro, .pie__aviso { display: none; }
+  .evento, .recordatorio, .tabla-envoltura, .fuente { box-shadow: none; break-inside: avoid; }
+  body { background-image: none; }
+}
+
+/* Solo para lectores de pantalla (anuncios de filtro) */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Hora y lugar de un evento */
+.evento__cuando {
+  display: inline-block;
+  border: var(--borde-fino);
+  background: var(--celeste);
+  padding: 4px 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: calc(var(--paso) * 1.5);
+}
+
+/* Aclaración sobre un dato que cambió o que falta */
+.evento__nota {
+  border-left: 6px solid var(--tinta);
+  background: var(--papel-hueso);
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin-bottom: calc(var(--paso) * 1.5);
+}
