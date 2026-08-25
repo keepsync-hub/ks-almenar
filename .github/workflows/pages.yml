@@ -1,0 +1,78 @@
+name: Publicar portal
+
+# Se dispara con cada push a main que toque docs/, lo que incluye los commits
+# que hace n8n sobre docs/auto.js en su corrida diaria.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+      - '.github/scripts/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+      - '.github/scripts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nunca dos despliegues a la vez. No se cancelan a medias: un deploy
+# interrumpido puede dejar el sitio en un estado raro.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verificar:
+    name: Verificar los datos del portal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Sintaxis de los archivos de datos
+        run: |
+          node --check docs/data.js
+          node --check docs/auto.js
+          node --check docs/app.js
+
+      - name: Contenido de los archivos de datos
+        run: node .github/scripts/validar-datos.mjs
+
+  publicar:
+    name: Publicar en GitHub Pages
+    needs: verificar
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+        with:
+          # Habilita Pages solo si todavía no lo está, para no depender de un
+          # paso manual en Settings.
+          enablement: true
+
+      - name: Empaquetar docs/
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Desplegar
+        id: despliegue
+        uses: actions/deploy-pages@v4
+
+      - name: Dónde quedó
+        run: echo "Portal publicado en ${{ steps.despliegue.outputs.page_url }}"

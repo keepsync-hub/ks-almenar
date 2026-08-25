@@ -77,4 +77,10 @@ Desde `Preparar correos para el resumen` sale una segunda rama que actualiza Git
 
 **Garantía de seguridad:** el workflow escribe únicamente en `docs/auto.js`. `data.js` —donde vive el calendario de evaluaciones transcrito de los adjuntos— nunca se toca. Y si la lectura de `auto.js` falla, el Code node aborta sin escribir, para no publicar un archivo a medias.
 
-El commit en `main` dispara el rebuild de GitHub Pages automáticamente.
+El commit en `main` dispara el workflow de GitHub Actions
+([`.github/workflows/pages.yml`](../.github/workflows/pages.yml)), que **valida los
+datos antes de publicar**. Si una corrida de n8n produjera un `auto.js` malformado
+—JSON roto, un curso inexistente, una fecha como `2026-02-31`— el despliegue se
+detiene y el portal sigue mostrando la última versión buena.
+
+Para ver si la última corrida publicó, la pestaña **Actions** del repositorio.
