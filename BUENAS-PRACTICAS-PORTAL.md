@@ -58,9 +58,28 @@ Dos prohibiciones que se derivan:
 El foco de teclado usa `outline: 4px` con offset. En un diseño de bordes gruesos,
 un foco fino simplemente no se ve.
 
-## 4. Separar el dato del marcado
+## 4. Separar el dato del marcado, y lo curado de lo automático
 
-Todo el contenido vive en `docs/data.js`; `app.js` solo lo renderiza.
+Todo el contenido vive en datos, no en HTML; `app.js` solo lo renderiza. Y los datos
+están partidos en dos archivos según quién los escribe:
+
+| Archivo | Autor | Regla |
+| --- | --- | --- |
+| `docs/data.js` | Una persona | n8n **nunca** lo toca |
+| `docs/auto.js` | El workflow diario | Se reescribe entero en cada cambio |
+
+Esta separación es lo que hace que la automatización sea segura de activar. Un
+workflow que regenerara `data.js` con lo detectado en las últimas 26 horas borraría
+el calendario de evaluaciones —que salió de un adjunto, no de un correo diario— en
+su primera corrida. Al escribir solo en `auto.js`, el peor caso de un fallo del
+modelo es que sobre un ítem, nunca que falte uno.
+
+La fusión ocurre en el navegador y **lo curado siempre gana**: si el mismo ítem
+(curso + fecha + título normalizado) está en los dos archivos, se muestra el de
+`data.js`. Corregir una fecha a mano es, por lo tanto, permanente.
+
+Los ítems automáticos se rotulan **"Detectado automáticamente"**. La procedencia de
+un dato es parte del dato.
 
 Actualizar la agenda es editar un objeto, no tocar HTML. Esto tiene tres
 beneficios que importan:
