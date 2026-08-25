@@ -92,6 +92,12 @@
     </div>
 
     <div id="vistaCalendario">
+      <h3 class="paso__titulo"><span class="paso__num">1</span> Elegí la evaluación</h3>
+      <div class="sel" id="selectorEval" role="group" aria-label="Evaluación para la que se asignan días"></div>
+
+      <h3 class="paso__titulo"><span class="paso__num">2</span> Marcá los días que vas a estudiar</h3>
+      <p class="asignando" id="asignandoPara" hidden></p>
+
       <div class="cal__barra">
         <button class="filtro__boton" type="button" id="calAtras" aria-label="Tres semanas anteriores">←</button>
         <span class="placa" id="calRango">—</span>
@@ -100,7 +106,9 @@
       </div>
 
       <p class="seccion__nota">
-        Toca un día para marcarlo como día de estudio. La selección se guarda solo en este navegador.
+        Solo se pueden marcar días entre hoy y el día de la prueba. Los días que ya
+        asignaste a otras evaluaciones aparecen con una marca pequeña. Todo se guarda
+        solo en este navegador.
       </p>
 
       <div class="cal" id="calendario"></div>

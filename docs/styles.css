@@ -524,3 +524,95 @@ tr.evaluacion--realizada td { opacity: 0.6; }
   margin-bottom: calc(var(--paso) * 2);
   max-width: 70ch;
 }
+
+/* ---------------- Selector de evaluación (paso 1) ---------------- */
+
+.paso__titulo {
+  display: flex; align-items: center; gap: var(--paso);
+  margin: calc(var(--paso) * 3) 0 calc(var(--paso) * 1.5);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.paso__num {
+  display: grid; place-content: center;
+  width: 28px; height: 28px;
+  background: var(--tinta); color: var(--papel);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.sel { display: flex; gap: var(--paso); flex-wrap: wrap; }
+
+.sel__ev {
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  background: var(--papel);
+  border: var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 8px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 120px;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.sel__ev:hover { transform: translate(-2px, -2px); box-shadow: var(--sombra); }
+.sel__ev--celeste  { background: var(--celeste); }
+.sel__ev--amarillo { background: var(--amarillo); }
+
+/* La activa se invierte: es la única que está recibiendo los clics */
+.sel__ev[aria-pressed="true"] {
+  background: var(--tinta);
+  color: var(--papel);
+  box-shadow: var(--sombra);
+}
+
+.sel__asig  { font-weight: 700; font-size: 0.92rem; }
+.sel__fecha { font-size: 0.78rem; font-weight: 500; }
+.sel__conteo {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sel__conteo--cero { opacity: 0.65; }
+
+.asignando {
+  border-left: 6px solid var(--tinta);
+  background: var(--papel-hueso);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin: 0 0 calc(var(--paso) * 2);
+}
+
+/* ---------------- Calendario en modo asignación ---------------- */
+
+/* Fuera del rango hoy → día de la prueba no se puede asignar nada.
+   Se atenúa solo el número del día: si se atenuara la celda entera se
+   apagarían también los chips de las otras evaluaciones y se perdería la
+   vista general de cuándo son. */
+.cal__dia--bloqueado { cursor: default; }
+/* Un <button disabled> pinta de gris a TODOS sus hijos, incluidos los chips
+   de evaluación. Se fuerza el color para que sigan legibles. */
+.cal__dia:disabled,
+.cal__dia:disabled .cal__ev,
+.cal__dia:disabled .cal__marca { color: var(--tinta); }
+.cal__dia--bloqueado .cal__num,
+.cal__dia--bloqueado .cal__mes { opacity: 0.4; }
+.cal__dia--bloqueado:hover { background: var(--papel); }
+.cal__dia--bloqueado.cal__dia--pasado:hover { background: transparent; }
+
+.cal__asignaciones { display: flex; gap: 3px; flex-wrap: wrap; margin-top: auto; }
+.cal__marca {
+  border: 1px solid var(--tinta);
+  background: var(--menta);
+  padding: 0 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.plan__dias { font-size: 0.82rem; margin-top: 4px; }
+.plan__fila--activa { box-shadow: inset 4px 0 0 var(--tinta); }
+
+@media print {
+  .plan-print .cal__dia--bloqueado { opacity: 1; }
+  .plan-print .cal__marca { background: #e4e4e4 !important; }
+}
