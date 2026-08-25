@@ -616,3 +616,11 @@ tr.evaluacion--realizada td { opacity: 0.6; }
   .plan-print .cal__dia--bloqueado { opacity: 1; }
   .plan-print .cal__marca { background: #e4e4e4 !important; }
 }
+
+/* La barra de navegación es sticky: sin esto el destino del scroll queda
+   escondido debajo. */
+.seccion, .paso__titulo { scroll-margin-top: 68px; }
+
+/* Un chip que además es un botón */
+.chip--accion { text-decoration: none; cursor: pointer; }
+.chip--accion:hover { background: var(--tinta); color: var(--papel); }
