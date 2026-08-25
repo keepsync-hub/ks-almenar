@@ -114,13 +114,26 @@ válido. Las que están `realizada` salen tachadas.
 
 ### Días de estudio
 
-Tocar un día lo marca como día de estudio. Se guarda en `localStorage` del
-navegador de cada persona: no viaja al repositorio ni se comparte con los demás
+La asignación va en dos pasos: **primero se elige la evaluación**, después se marcan
+los días. Sin ese orden un día marcado no diría para qué se estudia, que es
+justamente lo que hace falta saber al planificar.
+
+- El selector de arriba lista las evaluaciones por delante. La activa queda en
+  negro y es la que recibe los clics.
+- En el calendario solo se pueden marcar días entre **hoy y el día de esa prueba**:
+  estudiar después no sirve, así que esos días quedan bloqueados.
+- Los días asignados a **otras** evaluaciones se ven igual, como marcas pequeñas,
+  para no perder la vista del plan completo mientras se edita una sola.
+- Un mismo día puede servir a varias evaluaciones, que es lo que pasa de verdad
+  cuando hay dos pruebas seguidas.
+
+Todo se guarda en `localStorage` del navegador de cada persona, bajo la clave
+`portal-almenar:planEstudio`. No viaja al repositorio ni se comparte con los demás
 apoderados. Los días que quedan más de 60 días en el pasado se borran solos.
 
-El plan cuenta, para cada evaluación, cuántos días marcados hay entre hoy y esa
-fecha. Solo avisa en rojo si una evaluación de las próximas dos semanas no tiene
-ninguno — marcar todo en rojo convertía el plan en un muro de alarma inútil.
+El plan avisa en rojo solo si una evaluación de las próximas dos semanas no tiene
+ningún día asignado — marcar todo en rojo convertía el plan en un muro de alarma
+inútil.
 
 ### El PDF
 

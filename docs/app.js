@@ -426,10 +426,11 @@
 
   /* ---------- calendario de evaluaciones y plan de estudio ---------- */
 
-  var CLAVE_ESTUDIO = 'portal-almenar:diasEstudio';
+  var CLAVE_PLAN = 'portal-almenar:planEstudio';
   var SEMANAS_VISIBLES = 3;
   var DIAS_CABECERA = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
   var desplazamiento = 0;
+  var evalActiva = null;
 
   function claveFecha(d) {
     var m = String(d.getMonth() + 1);
@@ -451,41 +452,84 @@
     return x;
   }
 
-  function leerDiasEstudio() {
+  function fechaCorta(iso) {
+    var f = aFecha(iso);
+    return f ? f.getDate() + ' ' + MESES[f.getMonth()] : iso;
+  }
+
+  /* ---------- estado: qué días se estudia para cada evaluación ----------
+     planEstudio = { 'AAAA-MM-DD': ['claveEval', ...] }
+     Un mismo día puede servir a más de una evaluación, que es lo que pasa
+     de verdad cuando hay dos pruebas seguidas. */
+
+  function leerPlanEstudio() {
     try {
-      var crudo = window.localStorage.getItem(CLAVE_ESTUDIO);
+      var crudo = window.localStorage.getItem(CLAVE_PLAN);
       return crudo ? JSON.parse(crudo) : {};
     } catch (e) {
       return {};
     }
   }
 
-  function guardarDiasEstudio(mapa) {
+  function guardarPlanEstudio(mapa) {
     try {
-      window.localStorage.setItem(CLAVE_ESTUDIO, JSON.stringify(mapa));
+      window.localStorage.setItem(CLAVE_PLAN, JSON.stringify(mapa));
     } catch (e) {
-      /* Modo privado: la marca vive solo mientras dure la pestaña. */
+      /* Modo privado: la asignación vive solo mientras dure la pestaña. */
     }
   }
 
-  var diasEstudio = leerDiasEstudio();
+  var planEstudio = leerPlanEstudio();
 
-  function podarDiasEstudio() {
+  function claveEval(ev) {
+    return [ev.curso || '', ev.fecha || '', normalizar(ev.titulo)].join('|');
+  }
+
+  // La fecha va dentro de la clave, así que se puede podar sin buscar la
+  // evaluación original (que quizá ya no existe en los datos).
+  function fechaDeClave(clave) {
+    return String(clave).split('|')[1] || '';
+  }
+
+  function podarPlanEstudio() {
     var limite = claveFecha(sumarDias(hoy(), -60));
     var cambio = false;
-    Object.keys(diasEstudio).forEach(function (k) {
-      if (k < limite) { delete diasEstudio[k]; cambio = true; }
+    Object.keys(planEstudio).forEach(function (dia) {
+      if (dia < limite) {
+        delete planEstudio[dia];
+        cambio = true;
+        return;
+      }
+      var vivas = planEstudio[dia].filter(function (k) { return fechaDeClave(k) >= limite; });
+      if (vivas.length !== planEstudio[dia].length) {
+        cambio = true;
+        if (vivas.length) { planEstudio[dia] = vivas; } else { delete planEstudio[dia]; }
+      }
     });
-    if (cambio) { guardarDiasEstudio(diasEstudio); }
+    if (cambio) { guardarPlanEstudio(planEstudio); }
+  }
+
+  function diasDeEvaluacion(clave) {
+    return Object.keys(planEstudio)
+      .filter(function (dia) { return planEstudio[dia].indexOf(clave) !== -1; })
+      .sort();
+  }
+
+  function alternarAsignacion(dia, clave) {
+    var lista = planEstudio[dia] ? planEstudio[dia].slice() : [];
+    var i = lista.indexOf(clave);
+    if (i === -1) { lista.push(clave); } else { lista.splice(i, 1); }
+    if (lista.length) { planEstudio[dia] = lista; } else { delete planEstudio[dia]; }
+    guardarPlanEstudio(planEstudio);
+  }
+
+  function totalDiasMarcados() {
+    var claveHoy = claveFecha(hoy());
+    return Object.keys(planEstudio).filter(function (d) { return d >= claveHoy; }).length;
   }
 
   function evaluacionesVisibles() {
     return EVALUACIONES.filter(function (ev) { return ev.fecha && visible(ev.curso); });
-  }
-
-  function diasEstudioSeleccionados() {
-    var claveHoy = claveFecha(hoy());
-    return Object.keys(diasEstudio).filter(function (k) { return k >= claveHoy; }).sort();
   }
 
   function evaluacionesPorDelante() {
@@ -495,15 +539,90 @@
       .sort(function (a, b) { return a.fecha.localeCompare(b.fecha); });
   }
 
-  // Días marcados que caen entre hoy y la fecha de la evaluación, inclusive.
-  function estudioAntesDe(fecha, seleccionados) {
-    return seleccionados.filter(function (k) { return k <= fecha; }).length;
+  function evaluacionPorClave(clave) {
+    var encontrada = null;
+    EVALUACIONES.forEach(function (ev) {
+      if (claveEval(ev) === clave) { encontrada = ev; }
+    });
+    return encontrada;
+  }
+
+  /* ---------- selector de evaluación ---------- */
+
+  function pintarSelectorEvaluaciones() {
+    var cont = document.getElementById('selectorEval');
+    if (!cont) { return; }
+    vaciar(cont);
+
+    var proximas = evaluacionesPorDelante();
+    if (!proximas.length) {
+      evalActiva = null;
+      cont.appendChild(el('div', 'vacio', 'No hay evaluaciones próximas para este filtro.'));
+      return;
+    }
+
+    var claves = proximas.map(claveEval);
+    // Si la activa dejó de existir (cambió el filtro de curso, o ya pasó),
+    // se toma la más cercana para que el calendario nunca quede inerte.
+    if (!evalActiva || claves.indexOf(evalActiva) === -1) { evalActiva = claves[0]; }
+
+    proximas.forEach(function (ev) {
+      var k = claveEval(ev);
+      var curso = PORTAL.cursos[ev.curso];
+      var n = diasDeEvaluacion(k).length;
+
+      var boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'sel__ev' + (curso ? ' sel__ev--' + curso.tono : '');
+      boton.setAttribute('aria-pressed', String(k === evalActiva));
+
+      boton.appendChild(el('span', 'sel__asig', asignaturaCorta(ev.asignatura)));
+      boton.appendChild(el('span', 'sel__fecha', fechaCorta(ev.fecha)));
+      boton.appendChild(el('span', 'sel__conteo' + (n ? '' : ' sel__conteo--cero'),
+        n ? n + (n === 1 ? ' día' : ' días') : 'sin días'));
+
+      boton.title = ev.asignatura + ' — ' + ev.titulo;
+      boton.addEventListener('click', function () {
+        evalActiva = k;
+        pintarSelectorEvaluaciones();
+        pintarCalendario();
+        pintarPlan();
+      });
+
+      cont.appendChild(boton);
+    });
+  }
+
+  function pintarEncabezadoAsignacion() {
+    var cont = document.getElementById('asignandoPara');
+    if (!cont) { return; }
+    vaciar(cont);
+
+    var ev = evalActiva ? evaluacionPorClave(evalActiva) : null;
+    if (!ev) {
+      cont.hidden = true;
+      return;
+    }
+    cont.hidden = false;
+    cont.appendChild(document.createTextNode('Asignando días de estudio para: '));
+    cont.appendChild(el('strong', null, ev.asignatura + ' — ' + ev.titulo));
+    cont.appendChild(document.createTextNode(' (' + fechaLarga(ev.fecha) + ').'));
+  }
+
+  /* ---------- calendario ---------- */
+
+  // En una celda de calendario "Historia, Geografia y C. Sociales" se parte a
+  // mitad de palabra. Cortamos por la primera coma o " y ", que cubre todos los
+  // nombres largos que usa el colegio.
+  function asignaturaCorta(nombre) {
+    return String(nombre || '').split(/,| y /i)[0].trim();
   }
 
   function pintarCalendario() {
     var cont = document.getElementById('calendario');
     if (!cont) { return; }
     vaciar(cont);
+    pintarEncabezadoAsignacion();
 
     var inicio = sumarDias(lunesDe(hoy()), desplazamiento * SEMANAS_VISIBLES * 7);
     var claveHoy = claveFecha(hoy());
@@ -530,22 +649,26 @@
     avisarEvaluacionesFuera(claveFecha(fin));
   }
 
-  // En una celda de calendario "Historia, Geografia y C. Sociales" se parte a
-  // mitad de palabra. Cortamos por la primera coma o " y ", que cubre todos los
-  // nombres largos que usa el colegio.
-  function asignaturaCorta(nombre) {
-    return String(nombre || '').split(/,| y /i)[0].trim();
-  }
-
   function celdaDia(fecha, indice, claveHoy, porDia) {
     var k = claveFecha(fecha);
+    var activa = evalActiva ? evaluacionPorClave(evalActiva) : null;
+    var asignadas = planEstudio[k] || [];
+    var esDeLaActiva = evalActiva ? asignadas.indexOf(evalActiva) !== -1 : false;
+
+    // Solo tiene sentido estudiar entre hoy y el día de la prueba.
+    var asignable = !!activa && k >= claveHoy && k <= activa.fecha;
+
     var celda = document.createElement('button');
     celda.type = 'button';
     celda.className = 'cal__dia' +
       (k < claveHoy ? ' cal__dia--pasado' : '') +
-      (k === claveHoy ? ' cal__dia--hoy' : '');
-    celda.setAttribute('aria-pressed', String(!!diasEstudio[k]));
-    celda.setAttribute('aria-label', fechaLarga(k) + ': marcar como día de estudio');
+      (k === claveHoy ? ' cal__dia--hoy' : '') +
+      (asignable ? '' : ' cal__dia--bloqueado');
+    celda.disabled = !asignable;
+    celda.setAttribute('aria-pressed', String(esDeLaActiva));
+    celda.setAttribute('aria-label', activa
+      ? fechaLarga(k) + ': asignar como día de estudio para ' + activa.asignatura
+      : fechaLarga(k));
 
     var linea = el('div');
     linea.appendChild(el('span', 'cal__num', String(fecha.getDate())));
@@ -561,20 +684,34 @@
       var chip = el('span',
         'cal__ev cal__ev--' + (curso ? curso.tono : 'papel') +
         (ev.estado === 'realizada' ? ' cal__ev--realizada' : ''));
-      // En móvil la celda mide ~50px: no cabe ninguna palabra entera, así que
-      // se muestran tres letras y el nombre completo queda en el title.
       chip.appendChild(el('span', 'cal__ev-largo', corta));
       chip.appendChild(el('span', 'cal__ev-corto', corta.slice(0, 3)));
       chip.title = ev.asignatura + ' — ' + ev.titulo;
       celda.appendChild(chip);
     });
 
-    celda.addEventListener('click', function () {
-      if (diasEstudio[k]) { delete diasEstudio[k]; } else { diasEstudio[k] = true; }
-      guardarDiasEstudio(diasEstudio);
-      celda.setAttribute('aria-pressed', String(!!diasEstudio[k]));
-      pintarPlan();
-    });
+    // Días asignados a OTRAS evaluaciones: se muestran como marcas pequeñas
+    // para no perder de vista el plan completo mientras se edita una sola.
+    var otras = asignadas.filter(function (c) { return c !== evalActiva; });
+    if (otras.length) {
+      var fila = el('div', 'cal__asignaciones');
+      otras.forEach(function (c) {
+        var ev = evaluacionPorClave(c);
+        var marca = el('span', 'cal__marca', ev ? asignaturaCorta(ev.asignatura).slice(0, 3) : '?');
+        marca.title = ev ? ('Día de estudio para ' + ev.asignatura + ' — ' + ev.titulo) : 'Día de estudio';
+        fila.appendChild(marca);
+      });
+      celda.appendChild(fila);
+    }
+
+    if (asignable) {
+      celda.addEventListener('click', function () {
+        alternarAsignacion(k, evalActiva);
+        pintarSelectorEvaluaciones();
+        pintarCalendario();
+        pintarPlan();
+      });
+    }
 
     return celda;
   }
@@ -597,20 +734,22 @@
       fechaLarga(fuera[0].fecha) + ', ' + fuera[0].asignatura + '.';
   }
 
+  /* ---------- plan ---------- */
+
   function pintarPlan() {
     var cont = document.getElementById('plan');
     if (!cont) { return; }
     vaciar(cont);
 
-    var seleccionados = diasEstudioSeleccionados();
     var proximas = evaluacionesPorDelante();
 
     var caja = el('div', 'plan');
     caja.appendChild(el('h3', 'plan__titulo', 'Plan de estudio'));
 
     var resumen = el('div', 'plan__resumen');
+    var total = totalDiasMarcados();
     resumen.appendChild(el('span', 'chip chip--menta',
-      seleccionados.length + (seleccionados.length === 1 ? ' día marcado' : ' días marcados')));
+      total + (total === 1 ? ' día con estudio' : ' días con estudio')));
     resumen.appendChild(el('span', 'chip chip--durazno',
       proximas.length + (proximas.length === 1 ? ' evaluación por delante' : ' evaluaciones por delante')));
     caja.appendChild(resumen);
@@ -622,30 +761,34 @@
     }
 
     caja.appendChild(el('p', 'plan__aclaracion',
-      '"X días antes" cuenta los días que marcaste entre hoy y esa fecha. Se avisa en rojo solo si una evaluación de las próximas dos semanas no tiene ninguno.'));
+      'Cada día se asigna a una evaluación concreta. Se avisa en rojo solo si una evaluación de las próximas dos semanas no tiene ningún día asignado.'));
 
     var lista = el('ul', 'plan__lista');
     proximas.forEach(function (ev) {
-      var antes = estudioAntesDe(ev.fecha, seleccionados);
-      var dias = diasHasta(ev.fecha);
-      // Marcar en rojo TODO lo que no tenga dias asignados convierte el plan en
-      // un muro de alarma. Solo urge lo que esta a menos de dos semanas.
-      var urgeSinEstudio = (antes === 0 && dias <= 14);
+      var k = claveEval(ev);
+      var dias = diasDeEvaluacion(k);
+      var faltan = diasHasta(ev.fecha);
+      var urge = (dias.length === 0 && faltan <= 14);
 
-      var fila = el('li', 'plan__fila' + (urgeSinEstudio ? ' plan__fila--sinestudio' : ''));
+      var fila = el('li', 'plan__fila' + (urge ? ' plan__fila--sinestudio' : '') +
+        (k === evalActiva ? ' plan__fila--activa' : ''));
 
       var izq = el('div');
       izq.appendChild(el('div', 'plan__que', ev.asignatura + ' — ' + ev.titulo));
       izq.appendChild(el('div', 'plan__cuando',
-        fechaLarga(ev.fecha) + ' · ' + (dias === 0 ? 'es hoy' : 'en ' + dias + (dias === 1 ? ' día' : ' días'))));
+        fechaLarga(ev.fecha) + ' · ' + (faltan === 0 ? 'es hoy' : 'en ' + faltan + (faltan === 1 ? ' día' : ' días'))));
+      if (dias.length) {
+        izq.appendChild(el('div', 'plan__dias', 'Estudio: ' + dias.map(fechaCorta).join(' · ')));
+      }
       fila.appendChild(izq);
 
       var der = el('div', 'evento__chips');
       der.appendChild(chipCurso(ev.curso));
-      if (antes) {
-        der.appendChild(el('span', 'chip chip--menta', antes + (antes === 1 ? ' día antes' : ' días antes')));
+      if (dias.length) {
+        der.appendChild(el('span', 'chip chip--menta',
+          dias.length + (dias.length === 1 ? ' día asignado' : ' días asignados')));
       } else {
-        der.appendChild(el('span', 'chip ' + (urgeSinEstudio ? 'chip--rosa' : ''), 'sin días marcados'));
+        der.appendChild(el('span', 'chip ' + (urge ? 'chip--rosa' : ''), 'sin días asignados'));
       }
       fila.appendChild(der);
 
@@ -673,7 +816,6 @@
     vaciar(cont);
 
     var claveHoy = claveFecha(hoy());
-    var seleccionados = diasEstudioSeleccionados();
     var proximas = evaluacionesPorDelante();
     var curso = PORTAL.cursos[cursoActivo];
 
@@ -692,7 +834,7 @@
     if (proximas.length) {
       var tabla = document.createElement('table');
       var thead = document.createElement('thead');
-      thead.appendChild(filaTabla('th', ['Fecha', 'Curso', 'Asignatura', 'Evaluación', 'Faltan', 'Días marcados antes']));
+      thead.appendChild(filaTabla('th', ['Fecha', 'Curso', 'Asignatura', 'Evaluación', 'Faltan', 'Días asignados']));
       tabla.appendChild(thead);
 
       var tbody = document.createElement('tbody');
@@ -704,7 +846,7 @@
           ev.asignatura,
           ev.titulo,
           dias === 0 ? 'es hoy' : dias + (dias === 1 ? ' día' : ' días'),
-          String(estudioAntesDe(ev.fecha, seleccionados))
+          String(diasDeEvaluacion(claveEval(ev)).length)
         ]));
       });
       tabla.appendChild(tbody);
@@ -713,15 +855,21 @@
       cont.appendChild(el('p', null, 'No hay evaluaciones próximas.'));
     }
 
-    cont.appendChild(el('h2', null, 'Días marcados para estudiar'));
-    if (seleccionados.length) {
+    cont.appendChild(el('h2', null, 'Días de estudio por evaluación'));
+    var conDias = proximas.filter(function (ev) { return diasDeEvaluacion(claveEval(ev)).length; });
+    if (conDias.length) {
       var ul = document.createElement('ul');
-      seleccionados.forEach(function (k) {
-        ul.appendChild(el('li', null, fechaLarga(k)));
+      conDias.forEach(function (ev) {
+        var dias = diasDeEvaluacion(claveEval(ev));
+        var li = document.createElement('li');
+        li.appendChild(el('strong', null, ev.asignatura + ' — ' + ev.titulo));
+        li.appendChild(document.createTextNode(' (' + fechaLarga(ev.fecha) + '): '));
+        li.appendChild(document.createTextNode(dias.map(fechaLarga).join(' · ')));
+        ul.appendChild(li);
       });
       cont.appendChild(ul);
     } else {
-      cont.appendChild(el('p', null, 'Todavía no hay días marcados.'));
+      cont.appendChild(el('p', null, 'Todavía no hay días asignados a ninguna evaluación.'));
     }
 
     cont.appendChild(el('p', 'nota',
@@ -790,12 +938,14 @@
     pintarAgenda();
     pintarRecordatorios();
     pintarEvaluaciones();
+    // El selector define la evaluación activa, así que va antes del calendario.
+    pintarSelectorEvaluaciones();
     pintarCalendario();
     pintarPlan();
   }
 
   function iniciar() {
-    podarDiasEstudio();
+    podarPlanEstudio();
     pintarCabecera();
     pintarFuenteOficial();
     pintarTodo();
