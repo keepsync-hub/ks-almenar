@@ -65,12 +65,15 @@ Desde `Preparar correos para el resumen` sale una segunda rama que actualiza Git
 
 | Paso | Nodo | Detalle |
 | --- | --- | --- |
-| 1 | `Leer auto.js publicado` | GET a raw.githubusercontent de `docs/auto.js` |
-| 2 | `Leer data.js publicado` | GET de `docs/data.js`, para que el extractor sepa qué ya está publicado |
-| 3 | `Extraer novedades` | LLM + Structured Output Parser → `{eventos, recordatorios, evaluaciones}` |
-| 4 | `Fusionar novedades` | Code: dedup por curso+fecha+título, poda lo vencido hace más de 45 días |
-| 5 | `Solo si hay cambios` | Filter: si el archivo quedaría igual, no se hace commit |
-| 6 | `Publicar auto.js en GitHub` | Escribe `docs/auto.js` en `main` con la credencial `GitHub OAuth2 API` |
+| 1 | `Leer auto.js del repo` | GitHub `file:get` de `docs/auto.js` en `main` |
+| 2 | `Leer data.js del repo` | GitHub `file:get` de `docs/data.js`, para que el extractor sepa qué ya está publicado |
+| 3 | `Preparar contexto del portal` | Code: decodifica el base64 que devuelve la API |
+| 4 | `Extraer novedades` | LLM + Structured Output Parser → `{eventos, recordatorios, evaluaciones}` |
+| 5 | `Fusionar novedades` | Code: dedup por curso+fecha+título, poda lo vencido hace más de 45 días |
+| 6 | `Solo si hay cambios` | Filter: si el archivo quedaría igual, no se hace commit |
+| 7 | `Publicar auto.js en GitHub` | Escribe `docs/auto.js` en `main` con la credencial `GitHub OAuth2 API` |
+
+**Por qué la API y no `raw.githubusercontent`:** el CDN de raw cachea 5 minutos. Leer de ahí hacía que el workflow trabajara sobre un `auto.js` viejo y pudiera reescribir encima ítems recién eliminados. La API de contenidos devuelve siempre la versión vigente.
 
 **Garantía de seguridad:** el workflow escribe únicamente en `docs/auto.js`. `data.js` —donde vive el calendario de evaluaciones transcrito de los adjuntos— nunca se toca. Y si la lectura de `auto.js` falla, el Code node aborta sin escribir, para no publicar un archivo a medias.
 
