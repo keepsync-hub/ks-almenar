@@ -64,6 +64,47 @@
     return cursoActivo === 'todos' || cursoActivo === claveCurso;
   }
 
+  /* ---------- fusión con lo que detecta n8n ----------
+     data.js lo mantiene una persona; auto.js lo reescribe el workflow diario.
+     Ante la misma clave gana SIEMPRE lo curado a mano: así una corrida
+     automática no puede pisar el calendario de evaluaciones ni una fecha
+     corregida a mano. */
+
+  function normalizar(texto) {
+    return String(texto || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function claveItem(x) {
+    return [x.curso || '', x.fecha || '', normalizar(x.titulo || x.texto)].join('|');
+  }
+
+  function fusionar(curados, automaticos) {
+    var vistos = {};
+    var salida = [];
+    (curados || []).forEach(function (x) {
+      vistos[claveItem(x)] = true;
+      salida.push(x);
+    });
+    (automaticos || []).forEach(function (x) {
+      var k = claveItem(x);
+      if (vistos[k]) { return; }
+      vistos[k] = true;
+      x.auto = true;
+      salida.push(x);
+    });
+    return salida;
+  }
+
+  var AUTO = (typeof PORTAL_AUTO !== 'undefined' && PORTAL_AUTO) ? PORTAL_AUTO : {};
+  var EVENTOS       = fusionar(PORTAL.eventos, AUTO.eventos);
+  var RECORDATORIOS = fusionar(PORTAL.recordatorios, AUTO.recordatorios);
+  var EVALUACIONES  = fusionar(PORTAL.evaluaciones.items, AUTO.evaluaciones);
+
   function vaciar(nodo) {
     while (nodo.firstChild) { nodo.removeChild(nodo.firstChild); }
   }
@@ -102,12 +143,12 @@
   // lo mas cercano, tiene que salir arriba aunque viva en otra seccion.
   function proximosCombinados(limite) {
     var lista = [];
-    PORTAL.eventos.forEach(function (ev) {
+    EVENTOS.forEach(function (ev) {
       if (ev.fecha && visible(ev.curso) && diasHasta(ev.fecha) >= 0) {
         lista.push({ fecha: ev.fecha, titulo: ev.titulo, curso: ev.curso, clase: ev.tipo, hora: ev.hora || null });
       }
     });
-    PORTAL.evaluaciones.items.forEach(function (ev) {
+    EVALUACIONES.forEach(function (ev) {
       if (ev.fecha && visible(ev.curso) && ev.estado !== 'realizada' && diasHasta(ev.fecha) >= 0) {
         lista.push({ fecha: ev.fecha, titulo: ev.asignatura + ': ' + ev.titulo, curso: ev.curso, clase: 'Evaluación', hora: null });
       }
@@ -177,6 +218,7 @@
     var chips = el('div', 'evento__chips');
     chips.appendChild(chipCurso(ev.curso));
     chips.appendChild(el('span', 'chip', ev.tipo));
+    if (ev.auto) { chips.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (dias !== null && dias >= 0 && dias <= 7) {
       chips.appendChild(el('span', 'chip chip--rosa', dias === 0 ? 'Es hoy' : 'En ' + dias + (dias === 1 ? ' día' : ' días')));
     }
@@ -213,7 +255,7 @@
     var cont = document.getElementById('listaAgenda');
     vaciar(cont);
 
-    var items = PORTAL.eventos.filter(function (ev) { return visible(ev.curso); });
+    var items = EVENTOS.filter(function (ev) { return visible(ev.curso); });
 
     var futuros = items
       .filter(function (ev) { return ev.fecha && diasHasta(ev.fecha) >= 0; })
@@ -266,6 +308,7 @@
     meta.appendChild(chipCurso(r.curso));
     if (r.prioridad === 'urgente') { meta.appendChild(el('span', 'chip chip--rosa', 'Urgente')); }
     if (r.prioridad === 'habito')  { meta.appendChild(el('span', 'chip chip--menta', 'Hábito diario')); }
+    if (r.auto) { meta.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (r.vence) {
       var d = diasHasta(r.vence);
       var txt = d < 0 ? 'Venció' : (d === 0 ? 'Vence hoy' : 'Vence en ' + d + (d === 1 ? ' día' : ' días'));
@@ -285,7 +328,7 @@
     vaciar(cont);
 
     var marcados = leerMarcados();
-    var items = PORTAL.recordatorios
+    var items = RECORDATORIOS
       .filter(function (r) { return visible(r.curso); })
       .sort(function (a, b) { return peso(a.prioridad) - peso(b.prioridad); });
 
@@ -330,7 +373,7 @@
     var cuerpo = document.getElementById('cuerpoEvaluaciones');
     vaciar(cuerpo);
 
-    var items = PORTAL.evaluaciones.items
+    var items = EVALUACIONES
       .filter(function (ev) { return visible(ev.curso); })
       .sort(function (a, b) {
         var da = diasHasta(a.fecha), db = diasHasta(b.fecha);
@@ -402,6 +445,18 @@
       'Datos al ' + fechaLarga(PORTAL.actualizado);
     var ventana = document.getElementById('placaVentana');
     if (ventana && PORTAL.ventanaRevisada) { ventana.textContent = PORTAL.ventanaRevisada; }
+
+    var sync = document.getElementById('placaSync');
+    if (sync) {
+      if (AUTO.generado) {
+        var f = new Date(AUTO.generado);
+        sync.textContent = 'Última novedad automática: ' +
+          SEMANA[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()] + '. ' +
+          String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
+      } else {
+        sync.textContent = 'Sin novedades automáticas todavía';
+      }
+    }
   }
 
   function pintarTodo() {
