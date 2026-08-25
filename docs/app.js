@@ -120,6 +120,7 @@
       accion: null,
       origen: ev.origen,
       esEvaluacion: true,
+      clave: claveEval(ev),
       realizada: ev.estado === 'realizada'
     };
   }
@@ -244,8 +245,12 @@
     chips.appendChild(el('span', 'chip', ev.tipo));
     if (ev.auto) { chips.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (ev.esEvaluacion && !pasado) {
-      var enlace = el('a', 'chip chip--menta', 'Planificar estudio');
+      var enlace = el('a', 'chip chip--menta chip--accion', 'Planificar estudio');
       enlace.href = '#evaluaciones';
+      enlace.addEventListener('click', function (e) {
+        e.preventDefault();
+        irAPlanificar(ev.clave);
+      });
       chips.appendChild(enlace);
     }
     if (dias !== null && dias >= 0 && dias <= 7) {
@@ -625,6 +630,23 @@
 
       cont.appendChild(boton);
     });
+  }
+
+  // Desde la agenda: deja elegida la evaluación y lleva al calendario, para que
+  // solo quede marcar los días.
+  function irAPlanificar(clave) {
+    var disponibles = evaluacionesPorDelante().map(claveEval);
+    if (disponibles.indexOf(clave) !== -1) { evalActiva = clave; }
+
+    aplicarVista('calendario');
+    pintarSelectorEvaluaciones();
+    pintarCalendario();
+    pintarPlan();
+
+    var destino = document.getElementById('pasoSeleccion') || document.getElementById('evaluaciones');
+    if (!destino) { return; }
+    var suave = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    destino.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
   }
 
   function pintarEncabezadoAsignacion() {

@@ -146,6 +146,9 @@ justamente lo que hace falta saber al planificar.
 
 - El selector de arriba lista las evaluaciones por delante. La activa queda en
   negro y es la que recibe los clics.
+- El chip **"Planificar estudio"** de cada evaluación en la agenda es un atajo:
+  deja esa evaluación elegida, cambia a la vista de calendario si hacía falta y
+  baja hasta ahí, así solo queda marcar las fechas.
 - En el calendario solo se pueden marcar días entre **hoy y el día de esa prueba**:
   estudiar después no sirve, así que esos días quedan bloqueados.
 - Los días asignados a **otras** evaluaciones se ven igual, como marcas pequeñas,
