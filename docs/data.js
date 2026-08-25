@@ -111,6 +111,15 @@ const PORTAL = {
       origen: 'Adjunto "CALENDARIO 4°B.jpg" · Francisca Bravo · 24-07-2026'
     },
     {
+      id: 'leer-skateboarder',
+      curso: 'cuartob',
+      texto: 'Terminar de leer "The Skateboarder" para la prueba de Inglés',
+      prioridad: 'alta',
+      nota: 'La profesora de Inglés confirmó la evaluación para el miércoles 2 de septiembre.',
+      vence: '2026-09-02',
+      origen: 'Patricia Alvarado, profesora de Inglés'
+    },
+    {
       id: 'jeansday-500',
       curso: 'cuartob',
       texto: 'Enviar $500 para el Jeans Day',
@@ -192,6 +201,7 @@ const PORTAL = {
       { fecha: '2026-08-27', curso: 'cuartob', asignatura: 'Inglés', titulo: 'Book 2', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Jornada de doble evaluación junto con Lenguaje.', origen: 'Calendario 4°B' },
       { fecha: '2026-08-28', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Propiedades de la materia', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Características y propiedades fundamentales de la materia.', origen: 'Calendario 4°B' },
       { fecha: '2026-09-01', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Feria Científica', formato: 'Maqueta, afiche y exposición oral', estado: 'proxima', detalle: 'Investigación de un sistema, elaboración de maqueta y afiche, exposición oral con vocabulario científico. Reprogramada desde el 5 de agosto.', origen: 'Calendario 4°B + correo del 10-08-2026' },
+      { fecha: '2026-09-02', curso: 'cuartob', asignatura: 'Inglés', titulo: 'Prueba de lectura: "The Skateboarder"', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Fecha confirmada por la profesora de Inglés. No venía en el calendario del II semestre: se agregó después.', origen: 'Patricia Alvarado, profesora de Inglés' },
       { fecha: '2026-10-13', curso: 'cuartob', asignatura: 'Matemática', titulo: 'Unidad 4: Fracciones y decimales', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Fracciones, números decimales y notación científica.', origen: 'Calendario 4°B' },
       { fecha: '2026-10-14', curso: 'kinder', asignatura: 'Inglés', titulo: 'Obra "Are you my mom?" — English Day', formato: 'Presentación en grupo', estado: 'proxima', detalle: 'Se han hecho ensayos en clases. Requiere caracterización según el rol asignado.', origen: 'Correo de Cynthia Argandoña · 12-08-2026' },
       { fecha: '2026-10-15', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Unidad 3', formato: 'Prueba escrita', estado: 'proxima', detalle: 'Jornada de doble evaluación junto con Inglés.', origen: 'Calendario 4°B' },
