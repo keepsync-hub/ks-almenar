@@ -60,13 +60,29 @@ agenda por derecho propio.
   texto: 'Firmar y enviar la autorización',
   prioridad: 'alta',           // urgente | alta | media | habito
   nota: 'Contexto opcional.',
-  vence: '2026-09-12',         // o null
+  vence: '2026-09-12',         // o null, ver abajo
   origen: 'Francisca Bravo · 05-09-2026'
 }
 ```
 
 El `id` no se debe cambiar después: si cambia, quien ya lo marcó como hecho lo
 verá aparecer de nuevo sin marcar.
+
+### `vence` decide hasta cuándo se ve
+
+- **Con fecha**: se muestra normal hasta ese día inclusive. Al día siguiente sale
+  de la lista activa y del contador, y baja a un grupo **"Vencidos"**, atenuado,
+  donde se queda 30 días. Después desaparece solo. No hay que borrarlo a mano.
+- **`vence: null`**: no caduca nunca. Es para las reglas permanentes del curso
+  ("mandar la agenda escolar todos los días", "no enviar juguetes"), que siguen
+  siendo verdad mientras nadie las cambie. El validador avisa cada vez que
+  encuentra uno, justamente para que la decisión sea consciente.
+
+Una tarea con final —firmar algo, enviar dinero— siempre debería llevar `vence`,
+aunque la fecha sea aproximada: si no, se queda en el portal para siempre.
+
+Los recordatorios que detecta n8n nunca quedan sin `vence`: si el correo no trae
+fecha, el workflow les pone 30 días.
 
 ## Agregar una evaluación
 

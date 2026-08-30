@@ -6,6 +6,8 @@
   'use strict';
 
   var CLAVE_ALMACEN = 'portal-almenar:recordatorios';
+  // Cuanto pasado se sigue mostrando, atenuado, antes de soltarlo del todo.
+  var DIAS_VISIBLE_VENCIDO = 30;
   var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   var SEMANA = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
@@ -13,8 +15,16 @@
 
   /* ---------- utilidades de fecha ---------- */
 
+  // Todo el portal mira la fecha por aca, asi que fijarla en un solo punto
+  // permite revisar como se vera en otro dia: ?hoy=2026-09-29. Sin el
+  // parametro manda el reloj del equipo, que es el caso normal.
+  var HOY_FORZADO = (function () {
+    var m = /[?&]hoy=(\d{4})-(\d{2})-(\d{2})/.exec(window.location.search);
+    return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+  })();
+
   function hoy() {
-    var d = new Date();
+    var d = HOY_FORZADO || new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
@@ -303,7 +313,11 @@
     var sinFecha = items.filter(function (ev) { return !ev.fecha; });
 
     var pasados = items
-      .filter(function (ev) { return ev.fecha && diasHasta(ev.fecha) < 0; })
+      .filter(function (ev) {
+        if (!ev.fecha) { return false; }
+        var d = diasHasta(ev.fecha);
+        return d < 0 && d >= -DIAS_VISIBLE_VENCIDO;
+      })
       .sort(function (a, b) { return aFecha(b.fecha) - aFecha(a.fecha); });
 
     var ordenados = futuros.concat(sinFecha).concat(pasados);
@@ -327,9 +341,9 @@
     return Object.prototype.hasOwnProperty.call(PESO, prioridad) ? PESO[prioridad] : 9;
   }
 
-  function tarjetaRecordatorio(r, marcados) {
+  function tarjetaRecordatorio(r, marcados, vencido) {
     var li = el('li');
-    var label = el('label', 'recordatorio recordatorio--' + r.prioridad);
+    var label = el('label', 'recordatorio recordatorio--' + r.prioridad + (vencido ? ' recordatorio--vencido' : ''));
 
     var input = document.createElement('input');
     input.type = 'checkbox';
@@ -350,7 +364,10 @@
     if (r.auto) { meta.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (r.vence) {
       var d = diasHasta(r.vence);
-      var txt = d < 0 ? 'Venció' : (d === 0 ? 'Vence hoy' : 'Vence en ' + d + (d === 1 ? ' día' : ' días'));
+      var atras = Math.abs(d);
+      var txt = d < 0
+        ? 'Venció hace ' + atras + (atras === 1 ? ' día' : ' días')
+        : (d === 0 ? 'Vence hoy' : 'Vence en ' + d + (d === 1 ? ' día' : ' días'));
       meta.appendChild(el('span', 'chip chip--durazno', txt));
     }
     contenido.appendChild(meta);
@@ -367,18 +384,41 @@
     vaciar(cont);
 
     var marcados = leerMarcados();
-    var items = RECORDATORIOS
-      .filter(function (r) { return visible(r.curso); })
+    var items = RECORDATORIOS.filter(function (r) { return visible(r.curso); });
+
+    // Sin `vence` no caduca: eso queda reservado para las reglas permanentes del
+    // curso ("mandar la agenda todos los días"), que hoy siguen siendo verdad.
+    var activos = items
+      .filter(function (r) { return !r.vence || diasHasta(r.vence) >= 0; })
       .sort(function (a, b) { return peso(a.prioridad) - peso(b.prioridad); });
 
-    var pendientes = items.filter(function (r) { return !marcados[r.id]; }).length;
+    // Lo vencido sale de la lista activa y del contador al día siguiente, pero
+    // se queda un mes a la vista: sirve para confirmar que algo se hizo, no para
+    // seguir exigiéndolo.
+    var vencidos = items
+      .filter(function (r) {
+        if (!r.vence) { return false; }
+        var d = diasHasta(r.vence);
+        return d < 0 && d >= -DIAS_VISIBLE_VENCIDO;
+      })
+      .sort(function (a, b) { return aFecha(b.vence) - aFecha(a.vence); });
+
+    var pendientes = activos.filter(function (r) { return !marcados[r.id]; }).length;
     document.getElementById('conteoRecordatorios').textContent = pendientes;
 
-    if (!items.length) {
-      cont.appendChild(mensajeVacio('No hay recordatorios para este filtro.'));
-      return;
+    if (!activos.length) {
+      cont.appendChild(mensajeVacio(vencidos.length
+        ? 'No queda nada pendiente para este filtro.'
+        : 'No hay recordatorios para este filtro.'));
     }
-    items.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados)); });
+    activos.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados, false)); });
+
+    if (vencidos.length) {
+      var separador = el('li');
+      separador.appendChild(el('h3', 'lista__separador', 'Vencidos'));
+      cont.appendChild(separador);
+      vencidos.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados, true)); });
+    }
   }
 
   /* ---------- evaluaciones ---------- */

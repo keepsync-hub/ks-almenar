@@ -77,6 +77,12 @@ function revisarRecordatorios(lista, origen) {
       errores.push(donde + ': prioridad "' + r.prioridad + '" no es una de ' + PRIORIDADES.join(', '));
     }
     fechaValida(r.vence || null, donde + ' [vence]');
+    // Un recordatorio sin "vence" no caduca nunca: el portal lo muestra para
+    // siempre. Es lo correcto para una regla permanente del curso y un descuido
+    // en cualquier otro caso, asi que se avisa sin detener el deploy.
+    if (!r.vence) {
+      avisos.push(donde + ': sin "vence", no caduca. Confirma que es una regla permanente.');
+    }
   });
 }
 
