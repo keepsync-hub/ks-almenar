@@ -253,6 +253,17 @@ a  { color: var(--tinta); text-decoration-thickness: 2px; text-underline-offset:
   opacity: 0.6;
 }
 .recordatorio__meta { display: flex; gap: var(--paso); flex-wrap: wrap; margin-top: var(--paso); }
+/* Mismo atenuado que .evento--pasado: el pasado se ve igual en todo el portal. */
+.recordatorio--vencido { opacity: 0.55; }
+
+.lista__separador {
+  border-top: 3px dashed var(--tinta);
+  padding-top: calc(var(--paso) * 1.5);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-suave);
+}
 
 /* ---------------- Evaluaciones ---------------- */
 .fuente {

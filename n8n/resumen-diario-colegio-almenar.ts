@@ -375,7 +375,19 @@ const fusionarNovedades = node({
       jsCode:
         'const NL = String.fromCharCode(10);\n' +
         'const LIMITE_DIAS = 45;\n' +
-        'const HOY = new Date();\n' +
+        'const DIAS_SIN_VENCE = 30;\n' +
+        '// $now respeta la zona del workflow (America/Santiago). new Date() usaria\n' +
+        '// la hora del contenedor, en UTC, que adelanta el corte de dia.\n' +
+        'const HOY_ISO = $now.toFormat("yyyy-MM-dd");\n' +
+        'const HOY = new Date(HOY_ISO + "T00:00:00");\n' +
+        '\n' +
+        'function enDias(n) {\n' +
+        '  const f = new Date(HOY.getTime());\n' +
+        '  f.setDate(f.getDate() + n);\n' +
+        '  const m = String(f.getMonth() + 1).padStart(2, "0");\n' +
+        '  const d = String(f.getDate()).padStart(2, "0");\n' +
+        '  return f.getFullYear() + "-" + m + "-" + d;\n' +
+        '}\n' +
         '\n' +
         'function normalizar(t) {\n' +
         '  return String(t || "")\n' +
@@ -390,9 +402,13 @@ const fusionarNovedades = node({
         '  return [x.curso || "", x.fecha || "", normalizar(x.titulo || x.texto)].join("|");\n' +
         '}\n' +
         '\n' +
+        '// Los eventos y evaluaciones fechan en "fecha"; los recordatorios en\n' +
+        '// "vence". Mirar solo "fecha" dejaba a los recordatorios fuera de la poda\n' +
+        '// para siempre, y auto.js crecia sin limite.\n' +
         'function vigente(x) {\n' +
-        '  if (!x.fecha) { return true; }\n' +
-        '  const p = String(x.fecha).split("-");\n' +
+        '  const ref = x.fecha || x.vence;\n' +
+        '  if (!ref) { return true; }\n' +
+        '  const p = String(ref).split("-");\n' +
         '  const f = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));\n' +
         '  if (isNaN(f.getTime())) { return true; }\n' +
         '  return (HOY - f) / 86400000 <= LIMITE_DIAS;\n' +
@@ -412,6 +428,11 @@ const fusionarNovedades = node({
         '    if (vistos[k]) { return; }\n' +
         '    vistos[k] = true;\n' +
         '    if (x.texto && !x.id) { x.id = "auto-" + k; }\n' +
+        '    // Recordatorio nuevo sin fecha: caduca en 30 dias en vez de quedarse\n' +
+        '    // para siempre. Solo alcanza a los nuevos: los que ya venian de auto.js\n' +
+        '    // los descarta antes el dedup y conservan su vence. Ojo: nunca meter\n' +
+        '    // vence en clave(), o el mismo recordatorio se duplicaria cada dia.\n' +
+        '    if (x.texto && !x.vence) { x.vence = enDias(DIAS_SIN_VENCE); }\n' +
         '    salida.push(x);\n' +
         '  });\n' +
         '  salida.sort(function (a, b) {\n' +
