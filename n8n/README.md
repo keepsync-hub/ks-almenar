@@ -75,7 +75,36 @@ Desde `Preparar correos para el resumen` sale una segunda rama que actualiza Git
 
 **Por qué la API y no `raw.githubusercontent`:** el CDN de raw cachea 5 minutos. Leer de ahí hacía que el workflow trabajara sobre un `auto.js` viejo y pudiera reescribir encima ítems recién eliminados. La API de contenidos devuelve siempre la versión vigente.
 
-**Garantía de seguridad:** el workflow escribe únicamente en `docs/auto.js`. `data.js` —donde vive el calendario de evaluaciones transcrito de los adjuntos— nunca se toca. Y si la lectura de `auto.js` falla, el Code node aborta sin escribir, para no publicar un archivo a medias.
+### Tercera rama: el latido
+
+`auto.js` solo se commitea cuando hay novedades reales, y además su rama entera
+queda sin ejecutar los días en que Gmail no devuelve nada: la ejecución se
+detiene en el nodo de búsqueda (verificado en la ejecución `469` del 31-08-2026,
+0,6 s y `lastNodeExecuted: Buscar correos del colegio`). Resultado: mirando el
+repo era imposible distinguir un día tranquilo de un workflow caído.
+
+Por eso hay una rama que cuelga **del Schedule Trigger**, no del nodo de Gmail:
+
+| Paso | Nodo | Detalle |
+| --- | --- | --- |
+| 1 | `Marcar revision` | Code: arma `docs/estado.js` con `revisado: $now.toISO()` |
+| 2 | `Publicar estado.js en GitHub` | GitHub `file:edit` de `docs/estado.js` en `main`, en cada corrida |
+
+Sin filtro y sin condiciones: escribe siempre. Eso cuesta un commit y un deploy
+de Pages por día, y ese es exactamente el precio de poder detectar una caída en
+un sitio estático sin backend.
+
+El nodo va con `onError: continueRegularOutput` y 3 reintentos. El latido es un
+extra: si GitHub falla, el resumen por correo tiene que salir igual. Y un latido
+que no se escribe deja la cabecera del portal en alerta, que es justo la señal
+correcta.
+
+**Ojo con el orden al desplegar:** la operación es `edit`, que exige que el
+archivo ya exista. `docs/estado.js` tiene que estar en `main` **antes** de
+publicar esta versión del workflow.
+
+**Garantía de seguridad:** cada rama escribe únicamente en su archivo
+(`docs/auto.js` y `docs/estado.js`, respectivamente). `data.js` —donde vive el calendario de evaluaciones transcrito de los adjuntos— nunca se toca. Y si la lectura de `auto.js` falla, el Code node aborta sin escribir, para no publicar un archivo a medias.
 
 El commit en `main` dispara el workflow de GitHub Actions
 ([`.github/workflows/pages.yml`](../.github/workflows/pages.yml)), que **valida los

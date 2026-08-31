@@ -1,8 +1,9 @@
-/* Valida docs/data.js y docs/auto.js antes de publicar el portal.
-   Existe porque auto.js lo escribe n8n sin supervision humana: si una corrida
-   produce algo malformado, esto detiene el deploy en vez de romper el sitio. */
+/* Valida docs/data.js, docs/auto.js y docs/estado.js antes de publicar el
+   portal. Existe porque los dos ultimos los escribe n8n sin supervision
+   humana: si una corrida produce algo malformado, esto detiene el deploy en
+   vez de romper el sitio. */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const errores = [];
@@ -112,7 +113,7 @@ function revisarDuplicados(lista, donde) {
   });
 }
 
-let PORTAL, AUTO;
+let PORTAL, AUTO, ESTADO;
 
 try {
   PORTAL = cargar('docs/data.js', 'PORTAL');
@@ -129,8 +130,32 @@ try {
   process.exit(1);
 }
 
+// estado.js es el latido del workflow. Puede no existir todavia (nace con la
+// primera corrida que lo escriba), pero si esta y viene roto se detiene igual
+// que auto.js: la cabecera del portal lo lee.
+if (existsSync('docs/estado.js')) {
+  try {
+    ESTADO = cargar('docs/estado.js', 'PORTAL_ESTADO');
+  } catch (e) {
+    console.error('No se pudo cargar docs/estado.js: ' + e.message);
+    console.error('Este archivo lo escribe n8n. Revisar la ultima corrida del workflow.');
+    process.exit(1);
+  }
+}
+
 if (!PORTAL || typeof PORTAL !== 'object') { errores.push('data.js: PORTAL no es un objeto'); }
 if (!AUTO || typeof AUTO !== 'object')     { errores.push('auto.js: PORTAL_AUTO no es un objeto'); }
+
+if (ESTADO !== undefined) {
+  if (!ESTADO || typeof ESTADO !== 'object') {
+    errores.push('estado.js: PORTAL_ESTADO no es un objeto');
+  } else if (ESTADO.revisado !== null && ESTADO.revisado !== undefined) {
+    const marca = new Date(ESTADO.revisado);
+    if (typeof ESTADO.revisado !== 'string' || isNaN(marca.getTime())) {
+      errores.push('estado.js: "revisado" ("' + ESTADO.revisado + '") no es una fecha que se pueda leer');
+    }
+  }
+}
 
 const evCur = (PORTAL.eventos || []);
 const reCur = (PORTAL.recordatorios || []);
@@ -162,6 +187,7 @@ const ids = new Set();
 console.log('Curado   (data.js): ' + evCur.length + ' eventos, ' + reCur.length + ' recordatorios, ' + evaCur.length + ' evaluaciones');
 console.log('Automatico (auto.js): ' + evAuto.length + ' eventos, ' + reAuto.length + ' recordatorios, ' + evaAuto.length + ' evaluaciones');
 console.log('Ultima novedad automatica: ' + (AUTO.generado || 'todavia ninguna'));
+console.log('Ultima revision automatica: ' + ((ESTADO || {}).revisado || 'sin latido todavia'));
 
 if (avisos.length) {
   console.log('\nAvisos (no detienen la publicacion):');

@@ -136,6 +136,7 @@
   }
 
   var AUTO = (typeof PORTAL_AUTO !== 'undefined' && PORTAL_AUTO) ? PORTAL_AUTO : {};
+  var ESTADO = (typeof PORTAL_ESTADO !== 'undefined' && PORTAL_ESTADO) ? PORTAL_ESTADO : {};
   var EVENTOS       = fusionar(PORTAL.eventos, AUTO.eventos);
   var RECORDATORIOS = fusionar(PORTAL.recordatorios, AUTO.recordatorios);
   var EVALUACIONES  = fusionar(PORTAL.evaluaciones.items, AUTO.evaluaciones);
@@ -1007,6 +1008,63 @@
 
   /* ---------- arranque ---------- */
 
+  /* La placa del proceso automatico cruza dos archivos distintos: estado.js
+     lo escribe n8n en CADA corrida, y auto.js solo cuando hubo novedades. Sin
+     el primero no se puede distinguir un dia tranquilo de un proceso caido:
+     ambos se veian igual. */
+  // La corrida es diaria a las 07:00, asi que a las 06:59 del dia siguiente un
+  // latido de 24 h todavia es normal. 30 h deja margen para una corrida
+  // atrasada sin dar una falsa alarma, con el mismo criterio que la ventana de
+  // 26 h con que n8n busca los correos.
+  var HORAS_SIN_REVISAR = 30;
+
+  // A diferencia de hoy(), que devuelve medianoche, aca importa el instante.
+  // Respeta ?hoy= para poder probar el estado de alerta sin esperar 30 horas.
+  function ahora() {
+    return HOY_FORZADO || new Date();
+  }
+
+  function horaCorta(f) {
+    return String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
+  }
+
+  function diaCorto(f) {
+    return SEMANA[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()] + '.';
+  }
+
+  function diaRelativo(f) {
+    var medianoche = new Date(f.getFullYear(), f.getMonth(), f.getDate());
+    var dias = Math.round((medianoche - hoy()) / 86400000);
+    if (dias === 0)  { return 'hoy'; }
+    if (dias === -1) { return 'ayer'; }
+    return diaCorto(f);
+  }
+
+  function pintarPlacaSync(sync) {
+    sync.classList.remove('placa--alerta');
+
+    var revisado = ESTADO.revisado ? new Date(ESTADO.revisado) : null;
+    if (!revisado || isNaN(revisado.getTime())) {
+      sync.textContent = 'Revisión automática: sin datos';
+      return;
+    }
+
+    if ((ahora() - revisado) / 3600000 >= HORAS_SIN_REVISAR) {
+      sync.classList.add('placa--alerta');
+      sync.textContent = 'Sin revisar desde el ' + diaCorto(revisado);
+      return;
+    }
+
+    var texto = 'Revisado ' + diaRelativo(revisado) + ' ' + horaCorta(revisado);
+    var generado = AUTO.generado ? new Date(AUTO.generado) : null;
+    if (generado && !isNaN(generado.getTime())) {
+      texto += ' · última novedad: ' + generado.getDate() + ' de ' + MESES[generado.getMonth()] + '.';
+    } else {
+      texto += ' · sin novedades nuevas';
+    }
+    sync.textContent = texto;
+  }
+
   function pintarCabecera() {
     var d = hoy();
     document.getElementById('placaHoy').textContent =
@@ -1017,16 +1075,7 @@
     if (ventana && PORTAL.ventanaRevisada) { ventana.textContent = PORTAL.ventanaRevisada; }
 
     var sync = document.getElementById('placaSync');
-    if (sync) {
-      if (AUTO.generado) {
-        var f = new Date(AUTO.generado);
-        sync.textContent = 'Última novedad automática: ' +
-          SEMANA[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()] + '. ' +
-          String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
-      } else {
-        sync.textContent = 'Sin novedades automáticas todavía';
-      }
-    }
+    if (sync) { pintarPlacaSync(sync); }
   }
 
   function pintarTodo() {

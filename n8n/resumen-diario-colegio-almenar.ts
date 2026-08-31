@@ -536,6 +536,82 @@ const publicarAuto = node({
   output: [{ commit: { sha: '816822d' } }]
 });
 
+const marcarRevision = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Marcar revision',
+    parameters: {
+      mode: 'runOnceForAllItems',
+      language: 'javaScript',
+      jsCode: [
+        '// Latido del proceso. Se escribe en CADA corrida, tambien en los dias sin',
+        '// correos del colegio, que son la mayoria. Sin esto el portal no puede',
+        '// distinguir un dia tranquilo de un workflow caido: los dos se veian igual.',
+        '// Un solo campo a proposito: este archivo se commitea todos los dias, asi que',
+        '// el diff tiene que ser una linea.',
+        'const NL = String.fromCharCode(10);',
+        '',
+        'const cabecera = "/* GENERADO AUTOMATICAMENTE POR n8n - NO EDITAR A MANO." + NL +',
+        '  "   Lo reescribe el workflow Resumen diario correos Colegio Almenar en CADA" + NL +',
+        '  "   corrida, tambien en los dias sin correos del colegio. Es el latido que" + NL +',
+        '  "   permite distinguir \\"reviso y no habia nada\\" de \\"lleva dias sin correr\\"." + NL +',
+        '  "   Lo que se edita a mano va en data.js, que n8n nunca toca. */" + NL + NL;',
+        '',
+        'const cuerpo = { revisado: $now.toISO() };',
+        '',
+        'return [{ json: {',
+        '  contenido: cabecera + "const PORTAL_ESTADO = " + JSON.stringify(cuerpo, null, 2) + ";" + NL',
+        '} }];'
+      ].join('\n')
+    },
+    position: [220, 900]
+  },
+  output: [{ contenido: 'const PORTAL_ESTADO = { "revisado": "2026-08-31T07:00:58.011-04:00" };' }]
+});
+
+const publicarEstado = node({
+  type: 'n8n-nodes-base.github',
+  version: 1.1,
+  config: {
+    name: 'Publicar estado.js en GitHub',
+    parameters: {
+      resource: 'file',
+      operation: 'edit',
+      authentication: 'oAuth2',
+      owner: { __rl: true, mode: 'name', value: 'keepsync-hub' },
+      repository: { __rl: true, mode: 'name', value: 'ks-almenar' },
+      filePath: 'docs/estado.js',
+      binaryData: false,
+      fileContent: expr('{{ $json.contenido }}'),
+      commitMessage: expr('Portal: revisado el {{ $now.setZone("America/Santiago").toFormat("dd-MM-yyyy") }}'),
+      additionalParameters: { branch: { branch: 'main' } }
+    },
+    credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
+    // El latido es un extra: si GitHub falla, la corrida sigue y el resumen por
+    // correo igual sale. Un latido que no se escribe deja la cabecera del portal
+    // en alerta, que es justo la senal correcta.
+    onError: 'continueRegularOutput',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 2000,
+    position: [440, 900]
+  },
+  output: [{ commit: { sha: '0000000' } }]
+});
+
+const notaLatido = sticky(
+  '## Latido: docs/estado.js\n\n' +
+  'Escribe la fecha de ESTA corrida en `docs/estado.js` del repo `ks-almenar`, **siempre**, aunque no haya llegado ningun correo.\n\n' +
+  '### Por que cuelga del trigger y no de Gmail\n' +
+  'Cuando la busqueda de Gmail vuelve vacia, la ejecucion se detiene en ese nodo y **nada** rio abajo se ejecuta (verificado en la ejecucion 469: 0,6 s y `lastNodeExecuted: Buscar correos del colegio`). Si el latido colgara de ahi, faltaria justo los dias en que mas importa saber que el proceso corrio.\n\n' +
+  '### Para que sirve\n' +
+  'La cabecera del portal cruza dos archivos: `auto.js` (solo cambia cuando hay novedades) y `estado.js` (cambia todos los dias). Con los dos puede mostrar "revisado hoy, sin novedades" y avisar en rojo si pasan mas de 30 h sin corrida.\n\n' +
+  'Escribe en `docs/estado.js` y en ningun otro archivo.',
+  [marcarRevision, publicarEstado],
+  { color: 3 }
+);
+
 const notaConfiguracion = sticky(
   '## Resumen diario de correos del colegio\n\n' +
   'Corre todos los dias a las 07:00 (zona horaria America/Santiago, definida en Settings del workflow).\n\n' +
@@ -568,4 +644,8 @@ export default workflow('resumen-colegio-almenar', 'Resumen diario correos Coleg
   .to(fusionarNovedades)
   .to(soloSiHayCambios)
   .to(publicarAuto)
-  .add(notaConfiguracion);
+  .add(revisarDiario)
+  .to(marcarRevision)
+  .to(publicarEstado)
+  .add(notaConfiguracion)
+  .add(notaLatido);

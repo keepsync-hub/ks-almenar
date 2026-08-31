@@ -7,7 +7,7 @@ Automatizaciones y portal familiar para los correos del Colegio Almenar.
 | Ruta | Qué es |
 | --- | --- |
 | [`docs/`](./docs) | Portal de agenda, recordatorios y evaluaciones (GitHub Pages) |
-| [`n8n/`](./n8n) | Workflow que revisa Gmail una vez al día y envía un resumen |
+| [`n8n/`](./n8n) | Workflow que revisa Gmail una vez al día, envía un resumen y deja constancia de la corrida |
 | [`BUENAS-PRACTICAS-PORTAL.md`](./BUENAS-PRACTICAS-PORTAL.md) | Criterios de diseño y mantención del portal |
 
 ## Publicar el portal
@@ -35,9 +35,17 @@ El sitio queda en `https://keepsync-hub.github.io/ks-almenar/`.
 
 ### Por qué hay una verificación antes de publicar
 
-`docs/auto.js` lo escribe n8n sin que nadie lo revise. Sin este control, una
-corrida que produjera algo malformado rompería el portal para todos los
-apoderados hasta que alguien lo notara. El job lo detiene antes.
+`docs/auto.js` y `docs/estado.js` los escribe n8n sin que nadie los revise. Sin
+este control, una corrida que produjera algo malformado rompería el portal para
+todos los apoderados hasta que alguien lo notara. El job lo detiene antes.
+
+## Cómo saber si la revisión automática sigue viva
+
+n8n reescribe `docs/estado.js` en **cada** corrida, también los días sin correos,
+y la cabecera del portal lo muestra. Si pasan más de 30 horas sin corrida, la
+placa se pone en rojo con **"Sin revisar desde el …"**. Esa es la única señal de
+que el workflow se cayó: `auto.js` no sirve para eso, porque en un día tranquilo
+tampoco cambia.
 
 ## Actualizar la agenda
 
