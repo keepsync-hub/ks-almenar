@@ -113,12 +113,13 @@ contra la fecha del día, así que no hay que actualizarlas nunca a mano.
 
 ---
 
-## Los dos archivos de datos
+## Los tres archivos de datos
 
 | Archivo | Quién lo escribe | Qué contiene |
 | --- | --- | --- |
 | `data.js` | Una persona, a mano | Todo lo curado: agenda revisada, calendario de evaluaciones, recordatorios permanentes |
 | `auto.js` | El workflow de n8n | Lo que detecta solo en los correos del día |
+| `estado.js` | El workflow de n8n | Solo la fecha de la última corrida. No lleva contenido |
 
 **n8n nunca toca `data.js`.** Esa es la garantía que hace segura la automatización:
 una corrida automática no puede borrar el calendario de evaluaciones ni pisar una
@@ -131,6 +132,23 @@ detalle difiera.
 
 Los ítems que vienen de `auto.js` se muestran con la etiqueta **"Detectado
 automáticamente"**, para que se note de dónde salieron.
+
+### Para qué sirve `estado.js`
+
+`auto.js` solo cambia los días que hay novedades, que son los menos. Entonces
+mirarlo no sirve para saber si el proceso sigue vivo: un archivo quieto puede
+significar "no pasó nada" o "n8n lleva una semana caído".
+
+`estado.js` resuelve eso. n8n lo reescribe en **cada** corrida, aunque no haya
+llegado ningún correo, y la cabecera del portal lo usa para mostrar:
+
+- **"Revisado hoy 07:00 · sin novedades nuevas"** — todo bien, día tranquilo.
+- **"Revisado hoy 07:00 · última novedad: 25 de ago."** — corrió y hay contenido
+  automático de esa fecha.
+- **"Sin revisar desde el vie 28 de ago."**, en rojo — pasaron más de 30 horas
+  sin corrida. Hay que ir a mirar el workflow en n8n.
+
+Igual que `auto.js`, no se edita a mano: la siguiente corrida lo pisa.
 
 ### Cómo "ascender" un ítem automático
 

@@ -90,6 +90,11 @@ a  { color: var(--tinta); text-decoration-thickness: 2px; text-underline-offset:
   letter-spacing: 0.04em;
 }
 
+/* Se pinta cuando el proceso automático lleva más de 30 h sin correr. Es la
+   única señal de que n8n se cayó: sin esto el portal se ve igual que en un día
+   tranquilo. */
+.placa--alerta { background: var(--rosa); }
+
 /* ---------------- Navegación ---------------- */
 .navegacion {
   position: sticky; top: 0; z-index: 20;
