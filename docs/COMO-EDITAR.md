@@ -9,9 +9,9 @@ Se añade un objeto a `eventos`:
 ```js
 {
   fecha: '2026-09-15',        // AAAA-MM-DD. Si aún no hay fecha: null
-  curso: 'cuartob',           // 'kinder' o 'cuartob'
+  curso: 'cuartob',           // 'kinder', 'cuartob' o 'colegio'
   titulo: 'Salida pedagógica',
-  tipo: 'Actividad',          // Actividad | Presentación | Proyecto | Actividad evaluada
+  tipo: 'Actividad',          // Actividad | Presentación | Proyecto | Actividad evaluada | Reunión | Ceremonia | Sin clases
   detalle: 'Descripción breve de lo que hay que saber.',
   accion: 'Enviar autorización firmada',   // o null si no hay que hacer nada
   origen: 'Francisca Bravo · 05-09-2026'
@@ -23,6 +23,44 @@ Si la fecha no está confirmada:
 ```js
 fecha: null,
 fechaTexto: 'Fecha por confirmar',
+```
+
+### Lo que dura varios días
+
+Se agrega `fechaFin` con el último día incluido:
+
+```js
+fecha: '2026-11-03',
+fechaFin: '2026-11-05',
+```
+
+Mientras el rango esté corriendo, el portal lo sigue mostrando como vigente y le
+pone el chip "En curso". Sin `fechaFin`, la actividad dura un día.
+
+### Lo que vale para todo el colegio
+
+`curso: 'colegio'` es para lo que no es de un curso en particular: feriados, actos,
+reuniones de apoderados, celebraciones. **Se muestra siempre**, incluso con el filtro
+puesto en Kínder A o en 4° B: filtrar por curso no puede esconder que el lunes no
+hay clases.
+
+### Feriados y vacaciones
+
+Van como evento con `tipo: 'Sin clases'` y `accion: null`. Además de salir en la
+agenda, quedan marcados en el calendario de planificación. **No se bloquean como
+días de estudio**: en vacaciones igual se puede estudiar en casa.
+
+```js
+{
+  fecha: '2026-09-14',
+  fechaFin: '2026-09-18',
+  curso: 'colegio',
+  titulo: 'Vacaciones de Fiestas Patrias',
+  tipo: 'Sin clases',
+  detalle: 'Del lunes 14 al jueves 17 son vacaciones y el viernes 18 es feriado.',
+  accion: null,
+  origen: 'Cronograma 2° semestre'
+}
 ```
 
 ### Cuando un evento y una evaluación son la misma cosa
@@ -93,11 +131,14 @@ fecha, el workflow les pone 30 días.
   asignatura: 'Matemática',
   titulo: 'Prueba de fracciones',
   formato: 'Prueba escrita',
-  estado: 'proxima',           // proxima | realizada
   detalle: 'Contenidos que entran.',
   origen: 'Lirmi · 05-09-2026'
 }
 ```
+
+**No se escribe `estado`.** El portal deduce solo si una evaluación ya pasó, mirando
+la fecha contra el día de hoy. Antes se escribía a mano y quedaba viejo apenas nadie
+editaba el archivo. El validador rechaza el campo si aparece en `data.js`.
 
 **No inventar fechas de evaluaciones.** El calendario oficial está en Lirmi. Si un
 dato no está confirmado, es preferible dejarlo fuera antes que ponerlo mal.
@@ -106,6 +147,7 @@ dato no está confirmado, es preferible dejarlo fuera antes que ponerlo mal.
 
 ```sh
 node --check docs/data.js
+node .github/scripts/validar-datos.mjs
 ```
 
 Y abrir `docs/index.html` en el navegador. Las cuentas regresivas se calculan solas

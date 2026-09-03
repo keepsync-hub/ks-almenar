@@ -9,7 +9,9 @@ import vm from 'node:vm';
 const errores = [];
 const avisos = [];
 
-const CURSOS_VALIDOS = ['kinder', 'cuartob'];
+// 'colegio' es lo que vale para todo el establecimiento: feriados, actos y
+// reuniones. No tiene profesora jefe ni boton de filtro propio.
+const CURSOS_VALIDOS = ['kinder', 'cuartob', 'colegio'];
 const PRIORIDADES = ['urgente', 'alta', 'media', 'habito'];
 const ESTADOS = ['proxima', 'realizada'];
 const RE_FECHA = /^\d{4}-\d{2}-\d{2}$/;
@@ -64,6 +66,13 @@ function revisarEventos(lista, origen) {
     }
     if (!texto(ev.tipo)) { avisos.push(donde + ': sin "tipo"'); }
     fechaValida(ev.fecha, donde);
+    fechaValida(ev.fechaFin || null, donde + ' [fechaFin]');
+    if (ev.fechaFin && ev.fecha && ev.fechaFin < ev.fecha) {
+      errores.push(donde + ': "fechaFin" (' + ev.fechaFin + ') es anterior a "fecha" (' + ev.fecha + ')');
+    }
+    if (ev.fechaFin && !ev.fecha) {
+      errores.push(donde + ': tiene "fechaFin" pero no "fecha"');
+    }
   });
 }
 
@@ -94,6 +103,13 @@ function revisarEvaluaciones(lista, origen) {
     if (!texto(ev.asignatura)) { errores.push(donde + ': falta "asignatura"'); }
     if (!CURSOS_VALIDOS.includes(ev.curso)) {
       errores.push(donde + ': curso "' + ev.curso + '" invalido');
+    }
+    // El portal deduce si una evaluacion ya paso mirando la fecha. Escribirlo a
+    // mano en data.js solo sirve para que quede viejo, asi que se rechaza. En
+    // auto.js se tolera: lo emite el prompt de n8n y rechazarlo cortaria la
+    // publicacion diaria sin que nadie pueda arreglarlo desde el repo.
+    if (ev.estado && origen === 'data.js') {
+      errores.push(donde + ': no lleva "estado", se deduce de la fecha. Quitar el campo.');
     }
     if (ev.estado && !ESTADOS.includes(ev.estado)) {
       errores.push(donde + ': estado "' + ev.estado + '" no es ' + ESTADOS.join(' ni '));

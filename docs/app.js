@@ -42,6 +42,19 @@
     return Math.round((f - hoy()) / 86400000);
   }
 
+  // Lo que dura varios dias sigue vigente hasta su ultimo dia: unas vacaciones
+  // que empezaron ayer no son pasado. Sin fechaFin, el fin es el mismo dia.
+  function finDe(ev) {
+    return ev.fechaFin || ev.fecha;
+  }
+
+  // Una evaluacion esta realizada si su fecha ya paso, y punto. Antes venia
+  // escrito a mano en data.js y quedaba viejo apenas nadie editaba el archivo.
+  function estaRealizada(ev) {
+    var d = diasHasta(ev.fecha);
+    return d !== null && d < 0;
+  }
+
   function etiquetaDias(dias) {
     if (dias === 0) { return { numero: 'HOY', unidad: '' }; }
     if (dias === 1) { return { numero: '1', unidad: 'día' }; }
@@ -53,6 +66,17 @@
     var f = aFecha(texto);
     if (!f) { return 'Fecha por confirmar'; }
     return SEMANA[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()] + '. ' + f.getFullYear();
+  }
+
+  // "del lun 14 al vie 18 de sep. 2026". Si el rango no cambia de mes, el mes
+  // se dice una sola vez; sin fechaFin es una fecha suelta de siempre.
+  function fechaODeRango(ev) {
+    if (!ev.fechaFin || ev.fechaFin === ev.fecha) { return fechaLarga(ev.fecha); }
+    var a = aFecha(ev.fecha), b = aFecha(ev.fechaFin);
+    var inicio = SEMANA[a.getDay()] + ' ' + a.getDate() +
+      (a.getMonth() === b.getMonth() ? '' : ' de ' + MESES[a.getMonth()] + '.');
+    return 'del ' + inicio + ' al ' + SEMANA[b.getDay()] + ' ' + b.getDate() +
+      ' de ' + MESES[b.getMonth()] + '. ' + b.getFullYear();
   }
 
   /* ---------- utilidades varias ---------- */
@@ -71,6 +95,9 @@
   }
 
   function visible(claveCurso) {
+    // Un feriado o el acto de cierre valen para las dos familias: filtrar por
+    // curso no puede esconder que el lunes no hay clases.
+    if (claveCurso === 'colegio') { return true; }
     return cursoActivo === 'todos' || cursoActivo === claveCurso;
   }
 
@@ -131,7 +158,7 @@
       origen: ev.origen,
       esEvaluacion: true,
       clave: claveEval(ev),
-      realizada: ev.estado === 'realizada'
+      realizada: estaRealizada(ev)
     };
   }
 
@@ -180,12 +207,12 @@
   function proximosCombinados(limite) {
     var lista = [];
     EVENTOS.forEach(function (ev) {
-      if (ev.fecha && visible(ev.curso) && diasHasta(ev.fecha) >= 0) {
-        lista.push({ fecha: ev.fecha, titulo: ev.titulo, curso: ev.curso, clase: ev.tipo, hora: ev.hora || null });
+      if (ev.fecha && visible(ev.curso) && diasHasta(finDe(ev)) >= 0) {
+        lista.push({ fecha: ev.fecha, fechaFin: ev.fechaFin || null, titulo: ev.titulo, curso: ev.curso, clase: ev.tipo, hora: ev.hora || null });
       }
     });
     evaluacionesFueraDeAgenda(EVENTOS, EVALUACIONES).forEach(function (ev) {
-      if (ev.fecha && visible(ev.curso) && ev.estado !== 'realizada' && diasHasta(ev.fecha) >= 0) {
+      if (ev.fecha && visible(ev.curso) && !estaRealizada(ev) && diasHasta(ev.fecha) >= 0) {
         lista.push({ fecha: ev.fecha, titulo: ev.asignatura + ': ' + ev.titulo, curso: ev.curso, clase: 'Evaluación', hora: null });
       }
     });
@@ -206,7 +233,9 @@
 
     proximos.forEach(function (ev) {
       var dias = diasHasta(ev.fecha);
-      var etiqueta = etiquetaDias(dias);
+      // Un rango que ya empezo y todavia no termina no lleva cuenta regresiva:
+      // decir "1 dia atras" de unas vacaciones en curso confunde.
+      var etiqueta = dias < 0 ? { numero: 'YA', unidad: 'empezó' } : etiquetaDias(dias);
       var curso = PORTAL.cursos[ev.curso];
 
       var tarjeta = el('article', 'regresiva__tarjeta');
@@ -215,7 +244,7 @@
       tarjeta.appendChild(el('div', 'regresiva__dias', etiqueta.numero));
       if (etiqueta.unidad) { tarjeta.appendChild(el('div', 'regresiva__unidad', etiqueta.unidad)); }
       tarjeta.appendChild(el('div', 'regresiva__titulo', ev.titulo));
-      tarjeta.appendChild(el('div', 'regresiva__fecha', fechaLarga(ev.fecha) + (ev.hora ? ' · ' + ev.hora : '')));
+      tarjeta.appendChild(el('div', 'regresiva__fecha', fechaODeRango(ev) + (ev.hora ? ' · ' + ev.hora : '')));
 
       var chipsR = el('div', 'evento__chips');
       chipsR.appendChild(chipCurso(ev.curso));
@@ -230,10 +259,13 @@
 
   function tarjetaEvento(ev) {
     var dias = ev.fecha ? diasHasta(ev.fecha) : null;
-    var pasado = dias !== null && dias < 0;
+    // Lo que dura varios dias solo es pasado cuando termino, no cuando empezo.
+    var pasado = ev.fecha ? diasHasta(finDe(ev)) < 0 : false;
+    var sinClases = ev.tipo === 'Sin clases';
 
     var li = el('li');
-    var art = el('article', 'evento' + (pasado ? ' evento--pasado' : '') + (ev.fecha ? '' : ' evento--sinfecha'));
+    var art = el('article', 'evento' + (pasado ? ' evento--pasado' : '') +
+      (ev.fecha ? '' : ' evento--sinfecha') + (sinClases ? ' evento--sinclases' : ''));
 
     var curso = PORTAL.cursos[ev.curso];
     var caja = el('div', 'evento__fecha');
@@ -244,6 +276,9 @@
       caja.appendChild(el('span', 'evento__dia', String(f.getDate())));
       caja.appendChild(el('span', 'evento__mes', MESES[f.getMonth()]));
       caja.appendChild(el('span', 'evento__semana', SEMANA[f.getDay()]));
+      if (ev.fechaFin && ev.fechaFin !== ev.fecha) {
+        caja.appendChild(el('span', 'evento__hasta', 'al ' + aFecha(ev.fechaFin).getDate()));
+      }
     } else {
       caja.appendChild(el('span', 'evento__dia', '?'));
       caja.appendChild(el('span', 'evento__mes', 'por confirmar'));
@@ -264,12 +299,18 @@
       });
       chips.appendChild(enlace);
     }
-    if (dias !== null && dias >= 0 && dias <= 7) {
+    if (dias !== null && dias < 0 && !pasado) {
+      chips.appendChild(el('span', 'chip chip--rosa', 'En curso'));
+    } else if (dias !== null && dias >= 0 && dias <= 7) {
       chips.appendChild(el('span', 'chip chip--rosa', dias === 0 ? 'Es hoy' : 'En ' + dias + (dias === 1 ? ' día' : ' días')));
     }
     cuerpo.appendChild(chips);
 
     cuerpo.appendChild(el('h3', 'evento__titulo', ev.titulo));
+
+    if (ev.fechaFin && ev.fechaFin !== ev.fecha) {
+      cuerpo.appendChild(el('div', 'evento__cuando', fechaODeRango(ev)));
+    }
 
     if (ev.hora || ev.lugar) {
       var cuando = [];
@@ -284,7 +325,7 @@
       cuerpo.appendChild(el('div', 'evento__nota', 'Ojo: ' + ev.nota));
     }
 
-    if (ev.accion && !pasado) {
+    if (ev.accion && !pasado && !sinClases) {
       cuerpo.appendChild(el('div', 'evento__accion', '→ ' + ev.accion));
     }
 
@@ -308,7 +349,7 @@
     var items = agendaCompleta().filter(function (ev) { return visible(ev.curso); });
 
     var futuros = items
-      .filter(function (ev) { return ev.fecha && diasHasta(ev.fecha) >= 0; })
+      .filter(function (ev) { return ev.fecha && diasHasta(finDe(ev)) >= 0; })
       .sort(function (a, b) { return aFecha(a.fecha) - aFecha(b.fecha); });
 
     var sinFecha = items.filter(function (ev) { return !ev.fecha; });
@@ -316,7 +357,7 @@
     var pasados = items
       .filter(function (ev) {
         if (!ev.fecha) { return false; }
-        var d = diasHasta(ev.fecha);
+        var d = diasHasta(finDe(ev));
         return d < 0 && d >= -DIAS_VISIBLE_VENCIDO;
       })
       .sort(function (a, b) { return aFecha(b.fecha) - aFecha(a.fecha); });
@@ -475,7 +516,7 @@
     }
 
     items.forEach(function (ev) {
-      var realizada = ev.estado === 'realizada';
+      var realizada = estaRealizada(ev);
       var tr = el('tr', realizada ? 'evaluacion--realizada' : '');
 
       var tdFecha = el('td');
@@ -613,9 +654,8 @@
   }
 
   function evaluacionesPorDelante() {
-    var claveHoy = claveFecha(hoy());
     return evaluacionesVisibles()
-      .filter(function (ev) { return ev.estado !== 'realizada' && ev.fecha >= claveHoy; })
+      .filter(function (ev) { return !estaRealizada(ev); })
       .sort(function (a, b) { return a.fecha.localeCompare(b.fecha); });
   }
 
@@ -715,6 +755,23 @@
     return String(nombre || '').split(/,| y /i)[0].trim();
   }
 
+  // Los feriados y las vacaciones se cargan como eventos de tipo 'Sin clases'.
+  // Aca se estiran a un dia por celda para poder pintarlos en el calendario.
+  // Es solo visual: esos dias se siguen pudiendo elegir como dias de estudio,
+  // porque en vacaciones igual se estudia en casa.
+  function diasSinClases() {
+    var mapa = {};
+    EVENTOS.forEach(function (ev) {
+      if (ev.tipo !== 'Sin clases' || !ev.fecha) { return; }
+      var d = aFecha(ev.fecha), hasta = aFecha(finDe(ev));
+      while (d <= hasta) {
+        mapa[claveFecha(d)] = ev.titulo;
+        d = sumarDias(d, 1);
+      }
+    });
+    return mapa;
+  }
+
   function pintarCalendario() {
     var cont = document.getElementById('calendario');
     if (!cont) { return; }
@@ -734,9 +791,11 @@
       cont.appendChild(el('div', 'cal__cabecera', d));
     });
 
+    var sinClases = diasSinClases();
+
     var total = SEMANAS_VISIBLES * 7;
     for (var i = 0; i < total; i++) {
-      cont.appendChild(celdaDia(sumarDias(inicio, i), i, claveHoy, porDia));
+      cont.appendChild(celdaDia(sumarDias(inicio, i), i, claveHoy, porDia, sinClases));
     }
 
     var fin = sumarDias(inicio, total - 1);
@@ -746,8 +805,9 @@
     avisarEvaluacionesFuera(claveFecha(fin));
   }
 
-  function celdaDia(fecha, indice, claveHoy, porDia) {
+  function celdaDia(fecha, indice, claveHoy, porDia, sinClases) {
     var k = claveFecha(fecha);
+    var libre = (sinClases || {})[k] || null;
     var activa = evalActiva ? evaluacionPorClave(evalActiva) : null;
     var asignadas = planEstudio[k] || [];
     var esDeLaActiva = evalActiva ? asignadas.indexOf(evalActiva) !== -1 : false;
@@ -760,18 +820,24 @@
     celda.className = 'cal__dia' +
       (k < claveHoy ? ' cal__dia--pasado' : '') +
       (k === claveHoy ? ' cal__dia--hoy' : '') +
+      (libre ? ' cal__dia--sinclases' : '') +
       (asignable ? '' : ' cal__dia--bloqueado');
     celda.disabled = !asignable;
     celda.setAttribute('aria-pressed', String(esDeLaActiva));
-    celda.setAttribute('aria-label', activa
+    celda.setAttribute('aria-label', (activa
       ? fechaLarga(k) + ': asignar como día de estudio para ' + activa.asignatura
-      : fechaLarga(k));
+      : fechaLarga(k)) + (libre ? '. Sin clases: ' + libre : ''));
 
     var linea = el('div');
     linea.appendChild(el('span', 'cal__num', String(fecha.getDate())));
     if (fecha.getDate() === 1 || indice === 0) {
       linea.appendChild(document.createTextNode(' '));
       linea.appendChild(el('span', 'cal__mes', MESES[fecha.getMonth()]));
+    }
+    if (libre) {
+      linea.appendChild(document.createTextNode(' '));
+      linea.appendChild(el('span', 'cal__libre', 'sin clases'));
+      celda.title = libre;
     }
     celda.appendChild(linea);
 
@@ -780,7 +846,7 @@
       var corta = asignaturaCorta(ev.asignatura);
       var chip = el('span',
         'cal__ev cal__ev--' + (curso ? curso.tono : 'papel') +
-        (ev.estado === 'realizada' ? ' cal__ev--realizada' : ''));
+        (estaRealizada(ev) ? ' cal__ev--realizada' : ''));
       chip.appendChild(el('span', 'cal__ev-largo', corta));
       chip.appendChild(el('span', 'cal__ev-corto', corta.slice(0, 3)));
       chip.title = ev.asignatura + ' — ' + ev.titulo;
@@ -817,10 +883,9 @@
   function avisarEvaluacionesFuera(claveFin) {
     var aviso = document.getElementById('calFuera');
     if (!aviso) { return; }
-    var claveHoy = claveFecha(hoy());
     var fuera = evaluacionesVisibles()
       .filter(function (ev) {
-        return ev.estado !== 'realizada' && ev.fecha > claveFin && ev.fecha >= claveHoy;
+        return !estaRealizada(ev) && ev.fecha > claveFin;
       })
       .sort(function (a, b) { return a.fecha.localeCompare(b.fecha); });
 
