@@ -1,6 +1,7 @@
 /* Contenido del portal. Editar SOLO este archivo para actualizar la agenda.
-   Fuentes: correos y adjuntos de las profesoras jefe, más el cronograma del
-   2° semestre que se mostró en la reunión de apoderados del 7 de julio.
+   Fuentes: correos y adjuntos de las profesoras jefe, el cronograma del
+   2° semestre que se mostró en la reunión de apoderados del 7 de julio y las
+   publicaciones del colegio en @almenardelmaipo.
    Formato de fecha: AAAA-MM-DD. Sin fecha confirmada: fecha: null + fechaTexto.
    Lo que dura varios días lleva ademas `fechaFin` (el ultimo dia incluido).
    `curso: 'colegio'` es lo que vale para todos: feriados, actos, reuniones. Se
@@ -9,8 +10,8 @@
    fecha, asi no queda un 'proxima' viejo cuando nadie edita el archivo. */
 
 const PORTAL = {
-  actualizado: '2026-09-02',
-  ventanaRevisada: 'Correos y adjuntos del 1 de julio al 25 de agosto de 2026, más el cronograma del 2° semestre',
+  actualizado: '2026-09-07',
+  ventanaRevisada: 'Correos y adjuntos del 1 de julio al 25 de agosto de 2026, más el cronograma del 2° semestre y el cronograma del Día de la Chilenidad publicado por el colegio',
 
   cursos: {
     kinder:  { nombre: 'Kínder A', profesora: 'Cynthia Argandoña', tono: 'celeste' },
@@ -58,13 +59,15 @@ const PORTAL = {
     },
     {
       fecha: '2026-09-10',
-      fechaFin: '2026-09-11',
-      curso: 'cuartob',
+      hora: '08:45 (ingreso de las familias)',
+      lugar: 'Gimnasio del colegio',
+      curso: 'colegio',
       titulo: 'Día de la Chilenidad',
       tipo: 'Presentación',
-      detalle: '4° B participa representando la Cacharpaya. Los detalles de vestuario y presentación los enviaron José Luis y Sol, de Educación Física.',
-      accion: 'Revisar el correo de Ed. Física con los detalles',
-      origen: 'Francisca Bravo · 10-08-2026'
+      detalle: 'Acto con presentaciones de baile de todos los cursos. Horario: 08:30 ingresan los estudiantes · 08:45 ingresan las familias al gimnasio · 09:00 inauguración · 09:10 primera parte (Playgroup "Trote nortino", Pre kínder "La Trastrasera", Kínder "La polca", 1° básico "Akuru", 2° básico "La Palomita" y cuecas del público) · 10:00 recreo · 10:30 intervención · 10:40 segunda parte (3° "Diablada", 5° "Chocolate", 4° "Cacharpaya" y cuecas del público) · 11:00 cierre: los apoderados pasan al quincho, donde venden los 2° medios, y los cursos vuelven a sus salas con sus profesoras jefe · 11:30 convivencia por curso, de Playgroup a 6° básico · 12:20 limpieza y orden de salas · 12:30 salida de todos los estudiantes. Kínder A baila La polca en la primera parte y 4° B la Cacharpaya en la segunda.',
+      nota: 'El correo de agosto lo daba como jueves 10 y viernes 11; este cronograma, que es posterior, cubre solo el jueves 10 y cierra con la salida de todos los estudiantes a las 12:30. Si el 11 quedó con alguna actividad, lo tiene que confirmar el colegio.',
+      accion: 'Llegar a las 08:45 al gimnasio, con el vestuario del baile puesto',
+      origen: 'Cronograma de presentaciones · @almenardelmaipo · 07-09-2026'
     },
     {
       fecha: '2026-09-21',
@@ -248,6 +251,33 @@ const PORTAL = {
       nota: 'Aviso preventivo y general del curso. Mantener revisiones posteriores para que no vuelva a aparecer.',
       vence: null,
       origen: 'Francisca Bravo · 25-08-2026'
+    },
+    {
+      id: 'chilenidad-polca-kinder',
+      curso: 'kinder',
+      texto: 'Dejar listo el vestuario de Kínder A para La polca',
+      prioridad: 'urgente',
+      nota: 'Kínder baila en la primera parte, que parte a las 09:10. Los estudiantes entran a las 08:30, así que el vestuario tiene que ir puesto desde la casa.',
+      vence: '2026-09-10',
+      origen: 'Cronograma de presentaciones · @almenardelmaipo · 07-09-2026'
+    },
+    {
+      id: 'chilenidad-cacharpaya-cuartob',
+      curso: 'cuartob',
+      texto: 'Dejar listo el vestuario de 4° B para la Cacharpaya',
+      prioridad: 'urgente',
+      nota: 'La Cacharpaya va en la segunda parte, después del recreo, cerca de las 10:40. Los detalles de vestuario los enviaron José Luis y Sol, de Educación Física.',
+      vence: '2026-09-10',
+      origen: 'Cronograma de presentaciones · @almenardelmaipo · 07-09-2026 + Francisca Bravo · 10-08-2026'
+    },
+    {
+      id: 'chilenidad-convivencia',
+      curso: 'colegio',
+      texto: 'Preguntar a la profesora jefe qué llevar a la convivencia del curso',
+      prioridad: 'media',
+      nota: 'La convivencia es a las 11:30, después del acto, y va de Playgroup a 6° básico. El cronograma no dice qué aporta cada familia.',
+      vence: '2026-09-10',
+      origen: 'Cronograma de presentaciones · @almenardelmaipo · 07-09-2026'
     },
     {
       id: 'estudiar-28ago',
