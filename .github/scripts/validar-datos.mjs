@@ -162,14 +162,72 @@ if (existsSync('docs/estado.js')) {
 if (!PORTAL || typeof PORTAL !== 'object') { errores.push('data.js: PORTAL no es un objeto'); }
 if (!AUTO || typeof AUTO !== 'object')     { errores.push('auto.js: PORTAL_AUTO no es un objeto'); }
 
+function marcaValida(valor, campo) {
+  if (valor === null || valor === undefined) { return null; }
+  const marca = new Date(valor);
+  if (typeof valor !== 'string' || isNaN(marca.getTime())) {
+    errores.push('estado.js: "' + campo + '" ("' + valor + '") no es una fecha que se pueda leer');
+    return null;
+  }
+  return marca;
+}
+
 if (ESTADO !== undefined) {
   if (!ESTADO || typeof ESTADO !== 'object') {
     errores.push('estado.js: PORTAL_ESTADO no es un objeto');
-  } else if (ESTADO.revisado !== null && ESTADO.revisado !== undefined) {
-    const marca = new Date(ESTADO.revisado);
-    if (typeof ESTADO.revisado !== 'string' || isNaN(marca.getTime())) {
-      errores.push('estado.js: "revisado" ("' + ESTADO.revisado + '") no es una fecha que se pueda leer');
+  } else {
+    const revisado = marcaValida(ESTADO.revisado, 'revisado');
+    const desde = marcaValida(ESTADO.ventanaDesde, 'ventanaDesde');
+
+    // La ventana de busqueda termina cuando corre el proceso: al reves seria
+    // un latido escrito con una fecha inventada.
+    if (revisado && desde && desde > revisado) {
+      errores.push('estado.js: "ventanaDesde" es posterior a "revisado". La corrida no puede haber buscado correos del futuro.');
     }
+
+    if (ESTADO.correos !== null && ESTADO.correos !== undefined) {
+      if (typeof ESTADO.correos !== 'number' || !Number.isInteger(ESTADO.correos) || ESTADO.correos < 0) {
+        errores.push('estado.js: "correos" ("' + ESTADO.correos + '") no es un entero de 0 para arriba');
+      }
+    }
+
+    // Un latido viejo no detiene la publicacion: el portal ya lo muestra en
+    // rojo, y bloquear el deploy por eso dejaria el sitio congelado justo
+    // cuando alguien esta arreglandolo a mano.
+    if (revisado) {
+      const horas = (Date.now() - revisado.getTime()) / 3600000;
+      if (horas >= 30) {
+        avisos.push('el latido de n8n tiene ' + Math.round(horas) + ' h. El proceso automatico puede estar caido.');
+      }
+    } else {
+      avisos.push('estado.js no tiene latido ("revisado" en null). O n8n nunca corrio, o la rama que lo escribe no esta publicada.');
+    }
+  }
+}
+
+/* La cabecera del portal promete dos cosas sobre el contenido curado a mano:
+   hasta que dia llega y que alcanzo a mirar. Las escribe una persona en
+   data.js y no las verifica nadie, asi que al menos se revisa que existan,
+   que se puedan leer y que no digan una fecha futura. */
+if (PORTAL && typeof PORTAL === 'object') {
+  fechaValida(PORTAL.actualizado, 'data.js: "actualizado"');
+  if (!PORTAL.actualizado) {
+    errores.push('data.js: falta "actualizado". Es la fecha que muestra la cabecera.');
+  } else if (RE_FECHA.test(PORTAL.actualizado)) {
+    const [a, m, d] = PORTAL.actualizado.split('-').map(Number);
+    const marca = new Date(a, m - 1, d);
+    const ahora = new Date();
+    const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+    const dias = Math.round((hoy - marca) / 86400000);
+    if (dias < 0) {
+      errores.push('data.js: "actualizado" (' + PORTAL.actualizado + ') esta en el futuro.');
+    } else if (dias >= 14) {
+      avisos.push('data.js lleva ' + dias + ' dias sin actualizarse. La cabecera ya lo muestra en ambar.');
+    }
+  }
+
+  if (typeof PORTAL.ventanaRevisada !== 'string' || !PORTAL.ventanaRevisada.trim()) {
+    errores.push('data.js: falta "ventanaRevisada". Es lo que dice la cabecera sobre que se alcanzo a revisar a mano.');
   }
 }
 
@@ -204,6 +262,9 @@ console.log('Curado   (data.js): ' + evCur.length + ' eventos, ' + reCur.length 
 console.log('Automatico (auto.js): ' + evAuto.length + ' eventos, ' + reAuto.length + ' recordatorios, ' + evaAuto.length + ' evaluaciones');
 console.log('Ultima novedad automatica: ' + (AUTO.generado || 'todavia ninguna'));
 console.log('Ultima revision automatica: ' + ((ESTADO || {}).revisado || 'sin latido todavia'));
+console.log('Ventana de esa corrida: desde ' + ((ESTADO || {}).ventanaDesde || 'sin registrar') +
+  ', ' + (((ESTADO || {}).correos ?? null) === null ? 'correos sin registrar' : (ESTADO.correos + ' correo(s)')));
+console.log('Curado a mano hasta: ' + (PORTAL.actualizado || 'sin fecha'));
 
 if (avisos.length) {
   console.log('\nAvisos (no detienen la publicacion):');

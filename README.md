@@ -39,13 +39,55 @@ El sitio queda en `https://keepsync-hub.github.io/ks-almenar/`.
 este control, una corrida que produjera algo malformado rompería el portal para
 todos los apoderados hasta que alguien lo notara. El job lo detiene antes.
 
+## Qué dice la cabecera del portal
+
+Las cuatro placas de arriba parecen el mismo dato y no lo son. Dos las escribe
+una persona y dos el proceso automático:
+
+| Placa | Sale de | La escribe |
+| --- | --- | --- |
+| `Hoy: …` | el reloj del visitante | nadie |
+| `Curado a mano al …` | `PORTAL.actualizado` en `data.js` | una persona |
+| `Revisión a mano: …` | `PORTAL.ventanaRevisada` en `data.js` | una persona |
+| `Correo revisado …` | `docs/estado.js` | n8n, en cada corrida |
+
+La separación es a propósito: la fecha en que alguien cargó cronogramas a mano y
+la fecha en que el robot revisó el correo son dos verdades distintas, y mezclarlas
+producía una cabecera que se contradecía sola (decía "datos al 7 de septiembre"
+mientras la ventana declaraba correos revisados solo hasta el 25 de agosto).
+
+Las dos placas de mano no las verifica nadie, así que envejecen solas: pasados 14
+días sin tocar `data.js`, la placa se pone ámbar y dice cuántos días lleva. El
+validador de CI avisa lo mismo en el log, sin detener la publicación.
+
 ## Cómo saber si la revisión automática sigue viva
 
 n8n reescribe `docs/estado.js` en **cada** corrida, también los días sin correos,
-y la cabecera del portal lo muestra. Si pasan más de 30 horas sin corrida, la
-placa se pone en rojo con **"Sin revisar desde el …"**. Esa es la única señal de
-que el workflow se cayó: `auto.js` no sirve para eso, porque en un día tranquilo
-tampoco cambia.
+y la cabecera del portal lo muestra. Guarda tres cosas:
+
+- `revisado`: cuándo corrió.
+- `ventanaDesde`: desde qué momento buscó correos esa corrida (26 h antes).
+- `correos`: cuántos encontró. `0` es un día tranquilo; `null` es "no se pudo
+  saber", que no es lo mismo.
+
+La placa se pone en rojo en dos casos: si pasan más de 30 horas sin corrida
+(**"Sin revisar desde el …"**) o si el archivo no trae latido
+(**"Revisión automática: sin latido"**). Ese segundo caso antes se mostraba en
+gris, indistinguible de un día tranquilo, que es justo la confusión que esta
+placa existe para evitar. `auto.js` no sirve para nada de esto, porque en un día
+tranquilo tampoco cambia.
+
+### Lo que el latido no prueba
+
+Que el cron disparó, no que la revisión sirvió. El latido cuelga del Schedule
+Trigger, **antes** de Gmail: si la credencial caduca, si una profesora cambia de
+correo o si el colegio migra de dominio, la placa sigue verde. Por eso el latido
+guarda además `correos`: varios días seguidos en `0` fuera de vacaciones son la
+señal de ir a mirar la query del nodo de búsqueda.
+
+Y ojo con el historial: n8n conserva solo las últimas ejecuciones (unos 7 días).
+El registro de largo plazo de que esto corrió es el commit diario de
+`docs/estado.js` en este repo, no la pestaña de ejecuciones.
 
 ## Actualizar la agenda
 

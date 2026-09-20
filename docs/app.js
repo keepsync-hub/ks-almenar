@@ -1083,6 +1083,12 @@
   // 26 h con que n8n busca los correos.
   var HORAS_SIN_REVISAR = 30;
 
+  // Dias que puede llevar el contenido curado a mano sin que nadie lo toque
+  // antes de que la placa lo avise. La agenda se carga por tandas cuando
+  // llegan los cronogramas, asi que un par de semanas quietas es normal; mas
+  // que eso ya es un dato que envejecio sin que se note.
+  var DIAS_CURADO_VIEJO = 14;
+
   // A diferencia de hoy(), que devuelve medianoche, aca importa el instante.
   // Respeta ?hoy= para poder probar el estado de alerta sin esperar 30 horas.
   function ahora() {
@@ -1105,37 +1111,95 @@
     return diaCorto(f);
   }
 
+  // Hasta donde alcanzo de verdad la ultima corrida. Va en el title y no en la
+  // placa porque son dos instantes y no caben, pero es el dato que permite
+  // notar un hueco: si esta ventana empieza despues de que termino la anterior,
+  // hubo correos que nadie miro.
+  function tituloVentanaAuto(revisado) {
+    var desde = ESTADO.ventanaDesde ? new Date(ESTADO.ventanaDesde) : null;
+    if (!desde || isNaN(desde.getTime())) {
+      return 'Última corrida del proceso automático: ' + diaCorto(revisado) + ' ' +
+        horaCorta(revisado) + '. No dejó registro de desde cuándo buscó.';
+    }
+    return 'La última corrida buscó los correos recibidos entre el ' +
+      diaCorto(desde) + ' ' + horaCorta(desde) + ' y el ' +
+      diaCorto(revisado) + ' ' + horaCorta(revisado) + '.';
+  }
+
   function pintarPlacaSync(sync) {
     sync.classList.remove('placa--alerta');
+    sync.removeAttribute('title');
 
     var revisado = ESTADO.revisado ? new Date(ESTADO.revisado) : null;
     if (!revisado || isNaN(revisado.getTime())) {
-      sync.textContent = 'Revisión automática: sin datos';
+      // Sin latido no se puede afirmar nada, y eso es una falla, no un estado
+      // neutro: en gris se veia igual que un dia tranquilo, que es justo la
+      // confusion que esta placa existe para evitar.
+      sync.classList.add('placa--alerta');
+      sync.textContent = 'Revisión automática: sin latido';
+      sync.title = 'docs/estado.js no trae fecha de revisión: o el proceso nunca ' +
+        'corrió, o la rama que escribe el latido no está publicada en n8n.';
       return;
     }
 
     if ((ahora() - revisado) / 3600000 >= HORAS_SIN_REVISAR) {
       sync.classList.add('placa--alerta');
       sync.textContent = 'Sin revisar desde el ' + diaCorto(revisado);
+      sync.title = tituloVentanaAuto(revisado);
       return;
     }
 
-    var texto = 'Revisado ' + diaRelativo(revisado) + ' ' + horaCorta(revisado);
+    var texto = 'Correo revisado ' + diaRelativo(revisado) + ' ' + horaCorta(revisado);
+
+    // Cuantos correos encontro la corrida. Es lo que separa "revise y no habia
+    // nada" de "revise y encontre tres": el latido a secas no lo distingue.
+    var correos = (typeof ESTADO.correos === 'number' && isFinite(ESTADO.correos))
+      ? ESTADO.correos : null;
+    if (correos === 0)      { texto += ' · sin correos'; }
+    else if (correos === 1) { texto += ' · 1 correo'; }
+    else if (correos > 1)   { texto += ' · ' + correos + ' correos'; }
+
     var generado = AUTO.generado ? new Date(AUTO.generado) : null;
     if (generado && !isNaN(generado.getTime())) {
       texto += ' · última novedad: ' + generado.getDate() + ' de ' + MESES[generado.getMonth()] + '.';
-    } else {
+    } else if (correos === null) {
       texto += ' · sin novedades nuevas';
     }
+
     sync.textContent = texto;
+    sync.title = tituloVentanaAuto(revisado);
+  }
+
+  /* La otra mitad de la cabecera: hasta donde alcanza lo que se carga a mano.
+     Es un dato que una persona escribe en data.js y que nada mas vuelve a
+     mirar, asi que la placa lo envejece sola. Sin eso solo puede equivocarse
+     hacia el lado tranquilizador. */
+  function pintarPlacaCurado(placa) {
+    placa.classList.remove('placa--aviso');
+    placa.removeAttribute('title');
+    placa.textContent = 'Curado a mano al ' + fechaLarga(PORTAL.actualizado);
+
+    var f = aFecha(PORTAL.actualizado);
+    if (!f || isNaN(f.getTime())) { return; }
+
+    var dias = Math.round((hoy() - f) / 86400000);
+    if (dias < DIAS_CURADO_VIEJO) { return; }
+
+    placa.classList.add('placa--aviso');
+    placa.textContent += ' · hace ' + dias + ' días';
+    placa.title = 'Nadie actualiza a mano el contenido del portal hace ' + dias +
+      ' días. Lo que haya llegado por correo después de esa fecha solo está acá ' +
+      'si lo cargó el proceso automático.';
   }
 
   function pintarCabecera() {
     var d = hoy();
     document.getElementById('placaHoy').textContent =
       'Hoy: ' + SEMANA[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()] + '. ' + d.getFullYear();
-    document.getElementById('placaActualizado').textContent =
-      'Datos al ' + fechaLarga(PORTAL.actualizado);
+
+    var curado = document.getElementById('placaActualizado');
+    if (curado) { pintarPlacaCurado(curado); }
+
     var ventana = document.getElementById('placaVentana');
     if (ventana && PORTAL.ventanaRevisada) { ventana.textContent = PORTAL.ventanaRevisada; }
 
