@@ -185,6 +185,18 @@ if (ESTADO !== undefined) {
       errores.push('estado.js: "ventanaDesde" es posterior a "revisado". La corrida no puede haber buscado correos del futuro.');
     }
 
+    // Una ventana de minutos no es una ventana: es una resta mal escrita. Paso
+    // de verdad en la corrida 648, con $now.minus(26, "hours") dentro de un Code
+    // node, donde Luxon lee ese 26 como milisegundos. El portal habria dicho
+    // "revisado hoy" sobre una busqueda que no cubrio nada.
+    if (revisado && desde) {
+      const horas = (revisado.getTime() - desde.getTime()) / 3600000;
+      if (horas < 1) {
+        errores.push('estado.js: la ventana entre "ventanaDesde" y "revisado" es de ' +
+          Math.round(horas * 3600) + ' segundos. Revisar como se resta el tiempo en el nodo "Marcar revision".');
+      }
+    }
+
     if (ESTADO.correos !== null && ESTADO.correos !== undefined) {
       if (typeof ESTADO.correos !== 'number' || !Number.isInteger(ESTADO.correos) || ESTADO.correos < 0) {
         errores.push('estado.js: "correos" ("' + ESTADO.correos + '") no es un entero de 0 para arriba');
