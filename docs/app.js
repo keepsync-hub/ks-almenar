@@ -1083,12 +1083,6 @@
   // 26 h con que n8n busca los correos.
   var HORAS_SIN_REVISAR = 30;
 
-  // Dias que puede llevar el contenido curado a mano sin que nadie lo toque
-  // antes de que la placa lo avise. La agenda se carga por tandas cuando
-  // llegan los cronogramas, asi que un par de semanas quietas es normal; mas
-  // que eso ya es un dato que envejecio sin que se note.
-  var DIAS_CURADO_VIEJO = 14;
-
   // A diferencia de hoy(), que devuelve medianoche, aca importa el instante.
   // Respeta ?hoy= para poder probar el estado de alerta sin esperar 30 horas.
   function ahora() {
@@ -1170,38 +1164,18 @@
     sync.title = tituloVentanaAuto(revisado);
   }
 
-  /* La otra mitad de la cabecera: hasta donde alcanza lo que se carga a mano.
-     Es un dato que una persona escribe en data.js y que nada mas vuelve a
-     mirar, asi que la placa lo envejece sola. Sin eso solo puede equivocarse
-     hacia el lado tranquilizador. */
-  function pintarPlacaCurado(placa) {
-    placa.classList.remove('placa--aviso');
-    placa.removeAttribute('title');
-    placa.textContent = 'Curado a mano al ' + fechaLarga(PORTAL.actualizado);
-
-    var f = aFecha(PORTAL.actualizado);
-    if (!f || isNaN(f.getTime())) { return; }
-
-    var dias = Math.round((hoy() - f) / 86400000);
-    if (dias < DIAS_CURADO_VIEJO) { return; }
-
-    placa.classList.add('placa--aviso');
-    placa.textContent += ' · hace ' + dias + ' días';
-    placa.title = 'Nadie actualiza a mano el contenido del portal hace ' + dias +
-      ' días. Lo que haya llegado por correo después de esa fecha solo está acá ' +
-      'si lo cargó el proceso automático.';
-  }
-
+  /* La cabecera muestra solo lo que cambia solo: la fecha de hoy y lo que dejo
+     escrito la ultima corrida. Hubo dos placas mas, "Datos al ..." y el texto
+     largo de la ventana revisada, que salian de dos strings escritos a mano en
+     data.js. Se fueron porque no envejecian, se contradecian entre si y solo
+     podian equivocarse hacia el lado tranquilizador: decian "datos al 7 de
+     septiembre" mientras la ventana declaraba correos revisados hasta el 25 de
+     agosto. Lo que alcanzo a mirar el proceso lo dice ahora estado.js, que se
+     escribe solo en cada corrida. */
   function pintarCabecera() {
     var d = hoy();
     document.getElementById('placaHoy').textContent =
       'Hoy: ' + SEMANA[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()] + '. ' + d.getFullYear();
-
-    var curado = document.getElementById('placaActualizado');
-    if (curado) { pintarPlacaCurado(curado); }
-
-    var ventana = document.getElementById('placaVentana');
-    if (ventana && PORTAL.ventanaRevisada) { ventana.textContent = PORTAL.ventanaRevisada; }
 
     var sync = document.getElementById('placaSync');
     if (sync) { pintarPlacaSync(sync); }

@@ -217,31 +217,9 @@ if (ESTADO !== undefined) {
   }
 }
 
-/* La cabecera del portal promete dos cosas sobre el contenido curado a mano:
-   hasta que dia llega y que alcanzo a mirar. Las escribe una persona en
-   data.js y no las verifica nadie, asi que al menos se revisa que existan,
-   que se puedan leer y que no digan una fecha futura. */
-if (PORTAL && typeof PORTAL === 'object') {
-  fechaValida(PORTAL.actualizado, 'data.js: "actualizado"');
-  if (!PORTAL.actualizado) {
-    errores.push('data.js: falta "actualizado". Es la fecha que muestra la cabecera.');
-  } else if (RE_FECHA.test(PORTAL.actualizado)) {
-    const [a, m, d] = PORTAL.actualizado.split('-').map(Number);
-    const marca = new Date(a, m - 1, d);
-    const ahora = new Date();
-    const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
-    const dias = Math.round((hoy - marca) / 86400000);
-    if (dias < 0) {
-      errores.push('data.js: "actualizado" (' + PORTAL.actualizado + ') esta en el futuro.');
-    } else if (dias >= 14) {
-      avisos.push('data.js lleva ' + dias + ' dias sin actualizarse. La cabecera ya lo muestra en ambar.');
-    }
-  }
-
-  if (typeof PORTAL.ventanaRevisada !== 'string' || !PORTAL.ventanaRevisada.trim()) {
-    errores.push('data.js: falta "ventanaRevisada". Es lo que dice la cabecera sobre que se alcanzo a revisar a mano.');
-  }
-}
+/* La cabecera ya no muestra ningun dato escrito a mano, asi que no hay nada
+   que validar de ese lado: lo unico que promete son las dos placas que cambian
+   solas, y de esas la del proceso sale de estado.js, revisado mas arriba. */
 
 const evCur = (PORTAL.eventos || []);
 const reCur = (PORTAL.recordatorios || []);
@@ -276,7 +254,6 @@ console.log('Ultima novedad automatica: ' + (AUTO.generado || 'todavia ninguna')
 console.log('Ultima revision automatica: ' + ((ESTADO || {}).revisado || 'sin latido todavia'));
 console.log('Ventana de esa corrida: desde ' + ((ESTADO || {}).ventanaDesde || 'sin registrar') +
   ', ' + (((ESTADO || {}).correos ?? null) === null ? 'correos sin registrar' : (ESTADO.correos + ' correo(s)')));
-console.log('Curado a mano hasta: ' + (PORTAL.actualizado || 'sin fecha'));
 
 if (avisos.length) {
   console.log('\nAvisos (no detienen la publicacion):');

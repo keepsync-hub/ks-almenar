@@ -95,9 +95,6 @@ a  { color: var(--tinta); text-decoration-thickness: 2px; text-underline-offset:
    se ve igual que en un día tranquilo. */
 .placa--alerta { background: var(--rosa); }
 
-/* Más suave que la alerta: nada está roto, pero el dato envejeció. Hoy la usa
-   la placa del contenido curado a mano cuando nadie lo toca hace dos semanas. */
-.placa--aviso { background: var(--durazno); }
 
 /* ---------------- Navegación ---------------- */
 .navegacion {
