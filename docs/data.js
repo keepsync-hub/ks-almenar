@@ -9,15 +9,19 @@
    Las evaluaciones NO llevan `estado`: el portal deduce si ya pasó mirando la
    fecha, asi no queda un 'proxima' viejo cuando nadie edita el archivo.
 
-   `actualizado` y `ventanaRevisada` describen SOLO esta carga a mano, no lo que
-   revisa n8n: eso lo dice docs/estado.js, que se escribe solo. Hay que moverlos
-   en la misma tanda en que se carga contenido nuevo; pasados 14 dias la
-   cabecera los muestra en ambar y el validador avisa en el log. */
+   QUE ALCANZA A CUBRIR ESTE ARCHIVO (ultima carga: 07-09-2026)
+   Correos y adjuntos del 1 de julio al 25 de agosto de 2026, mas el cronograma
+   del 2° semestre y el cronograma del Dia de la Chilenidad publicados por el
+   colegio. Anotarlo aca al cargar una tanda nueva.
+
+   Esto es una nota para quien edita, no un dato del portal. Antes se mostraba
+   en la cabecera como dos placas, y se fueron: eran strings escritos a mano que
+   no envejecian y que terminaron contradiciendose (la cabecera decia "datos al
+   7 de septiembre" mientras la ventana declaraba correos revisados hasta el 25
+   de agosto). Lo que alcanzo a mirar el proceso lo dice docs/estado.js, que se
+   escribe solo en cada corrida. */
 
 const PORTAL = {
-  actualizado: '2026-09-07',
-  ventanaRevisada: 'Revisión a mano: correos y adjuntos del 1 de julio al 25 de agosto de 2026, más el cronograma del 2° semestre y el cronograma del Día de la Chilenidad publicado por el colegio',
-
   cursos: {
     kinder:  { nombre: 'Kínder A', profesora: 'Cynthia Argandoña', tono: 'celeste' },
     cuartob: { nombre: '4° B',     profesora: 'Francisca Bravo',   tono: 'amarillo' },

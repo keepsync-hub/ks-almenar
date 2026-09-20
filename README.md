@@ -41,24 +41,23 @@ todos los apoderados hasta que alguien lo notara. El job lo detiene antes.
 
 ## Qué dice la cabecera del portal
 
-Las cuatro placas de arriba parecen el mismo dato y no lo son. Dos las escribe
-una persona y dos el proceso automático:
+Solo lo que cambia solo:
 
 | Placa | Sale de | La escribe |
 | --- | --- | --- |
 | `Hoy: …` | el reloj del visitante | nadie |
-| `Curado a mano al …` | `PORTAL.actualizado` en `data.js` | una persona |
-| `Revisión a mano: …` | `PORTAL.ventanaRevisada` en `data.js` | una persona |
 | `Correo revisado …` | `docs/estado.js` | n8n, en cada corrida |
 
-La separación es a propósito: la fecha en que alguien cargó cronogramas a mano y
-la fecha en que el robot revisó el correo son dos verdades distintas, y mezclarlas
-producía una cabecera que se contradecía sola (decía "datos al 7 de septiembre"
-mientras la ventana declaraba correos revisados solo hasta el 25 de agosto).
+Hubo dos placas más, `Datos al …` y el texto largo de la ventana revisada, que
+salían de dos strings escritos a mano en `data.js`. Se fueron: no envejecían, no
+las verificaba nadie y terminaron contradiciéndose entre sí — la cabecera decía
+"datos al 7 de septiembre" mientras la ventana declaraba correos revisados solo
+hasta el 25 de agosto. Un dato que solo puede equivocarse hacia el lado
+tranquilizador es peor que no tener el dato.
 
-Las dos placas de mano no las verifica nadie, así que envejecen solas: pasados 14
-días sin tocar `data.js`, la placa se pone ámbar y dice cuántos días lleva. El
-validador de CI avisa lo mismo en el log, sin detener la publicación.
+Lo que alcanza a cubrir la carga a mano quedó anotado en el comentario de
+cabecera de `docs/data.js`, que es donde le sirve a quien edita el archivo, y no
+como una promesa mostrada a los apoderados.
 
 ## Cómo saber si la revisión automática sigue viva
 
