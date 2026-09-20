@@ -7,11 +7,16 @@
    `curso: 'colegio'` es lo que vale para todos: feriados, actos, reuniones. Se
    muestra siempre, tambien con el filtro puesto en un curso.
    Las evaluaciones NO llevan `estado`: el portal deduce si ya pasó mirando la
-   fecha, asi no queda un 'proxima' viejo cuando nadie edita el archivo. */
+   fecha, asi no queda un 'proxima' viejo cuando nadie edita el archivo.
+
+   `actualizado` y `ventanaRevisada` describen SOLO esta carga a mano, no lo que
+   revisa n8n: eso lo dice docs/estado.js, que se escribe solo. Hay que moverlos
+   en la misma tanda en que se carga contenido nuevo; pasados 14 dias la
+   cabecera los muestra en ambar y el validador avisa en el log. */
 
 const PORTAL = {
   actualizado: '2026-09-07',
-  ventanaRevisada: 'Correos y adjuntos del 1 de julio al 25 de agosto de 2026, más el cronograma del 2° semestre y el cronograma del Día de la Chilenidad publicado por el colegio',
+  ventanaRevisada: 'Revisión a mano: correos y adjuntos del 1 de julio al 25 de agosto de 2026, más el cronograma del 2° semestre y el cronograma del Día de la Chilenidad publicado por el colegio',
 
   cursos: {
     kinder:  { nombre: 'Kínder A', profesora: 'Cynthia Argandoña', tono: 'celeste' },

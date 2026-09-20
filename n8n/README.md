@@ -87,12 +87,53 @@ Por eso hay una rama que cuelga **del Schedule Trigger**, no del nodo de Gmail:
 
 | Paso | Nodo | Detalle |
 | --- | --- | --- |
-| 1 | `Marcar revision` | Code: arma `docs/estado.js` con `revisado: $now.toISO()` |
+| 1 | `Marcar revision` | Code: arma `docs/estado.js` con `revisado`, `ventanaDesde` y `correos` |
 | 2 | `Publicar estado.js en GitHub` | GitHub `file:edit` de `docs/estado.js` en `main`, en cada corrida |
 
 Sin filtro y sin condiciones: escribe siempre. Eso cuesta un commit y un deploy
 de Pages por día, y ese es exactamente el precio de poder detectar una caída en
 un sitio estático sin backend.
+
+### Qué guarda el latido, y por qué no basta con la fecha
+
+```js
+const PORTAL_ESTADO = {
+  "revisado": "2026-09-20T07:00:58.011-03:00",
+  "ventanaDesde": "2026-09-19T05:00:58.011-03:00",
+  "correos": 0
+};
+```
+
+- `revisado` dice que el cron disparó.
+- `ventanaDesde` dice hasta dónde alcanzó de verdad esa corrida. Es el mismo
+  límite que usa el `receivedAfter` del nodo de Gmail (26 h). Comparado con el
+  `revisado` de la corrida anterior muestra si quedó un hueco sin cubrir. Antes
+  esta información vivía en un string escrito a mano en `data.js` que nadie
+  verificaba y que solo podía equivocarse hacia el lado tranquilizador.
+- `correos` distingue "revisé y no había nada" (`0`) de "no se pudo saber"
+  (`null`). El conteo sale de `$("Buscar correos del colegio").all().length`,
+  dentro de un `try`: esa rama corre antes porque `executionOrder: v1` ordena las
+  ramas por posición y el nodo de búsqueda está más arriba. Si no hubiera
+  corrido, queda `null` y no `0`.
+
+**Si se cambia la ventana de 26 h en el nodo de Gmail, hay que cambiar también
+`HORAS_VENTANA` en `Marcar revision`.** Si no, el portal promete una ventana que
+no se buscó.
+
+### Lo que el latido no prueba
+
+Que el cron disparó, no que la revisión sirvió. Cuelga del trigger, antes de
+Gmail: si la credencial caduca, si una profesora cambia de correo o si el colegio
+migra de dominio, el latido sigue verde. `correos` es el contrapeso: varios días
+seguidos en `0` fuera de vacaciones es la señal de ir a mirar la query.
+
+### Ojo: publicar no es guardar
+
+Esta rama estuvo escrita y guardada como borrador desde el 31-08-2026 **sin estar
+publicada**, así que durante tres semanas no corrió: `docs/estado.js` se quedó con
+`revisado: null` y el portal, que mostraba ese caso en gris, se veía tranquilo. En
+n8n el borrador y la versión activa son cosas distintas; si `sameAsDraft` es
+`false`, lo que corre no es lo que se está mirando en el editor.
 
 El nodo va con `onError: continueRegularOutput` y 3 reintentos. El latido es un
 extra: si GitHub falla, el resumen por correo tiene que salir igual. Y un latido

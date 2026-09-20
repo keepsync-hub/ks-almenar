@@ -548,17 +548,55 @@ const marcarRevision = node({
         '// Latido del proceso. Se escribe en CADA corrida, tambien en los dias sin',
         '// correos del colegio, que son la mayoria. Sin esto el portal no puede',
         '// distinguir un dia tranquilo de un workflow caido: los dos se veian igual.',
-        '// Un solo campo a proposito: este archivo se commitea todos los dias, asi que',
-        '// el diff tiene que ser una linea.',
+        '//',
+        '// Ademas del instante guarda que alcanzo a mirar la corrida, que es lo que',
+        '// antes estaba escrito a mano en data.js y no lo verificaba nadie:',
+        '//   ventanaDesde: el mismo limite que usa el nodo de Gmail. Comparado con el',
+        '//     de la corrida anterior muestra si quedo un hueco sin cubrir.',
+        '//   correos: cuantos encontro. 0 es un dia tranquilo; null es "no se pudo',
+        '//     saber", que no es lo mismo y el portal no lo muestra igual.',
         'const NL = String.fromCharCode(10);',
+        '',
+        '// Tiene que ser el mismo numero que el receivedAfter del nodo de Gmail: si',
+        '// se cambia alla y no aca, el portal promete una ventana que no se buscó.',
+        'const HORAS_VENTANA = 26;',
+        '',
+        '// Ojo con la forma de restar. El nodo de Gmail usa $now.minus(26, "hours")',
+        '// y ahi funciona porque las expresiones {{ }} de n8n extienden Luxon con',
+        '// minus(n, unidad). Aca adentro $now es Luxon puro: minus(26, "hours")',
+        '// resta 26 MILISEGUNDOS e ignora el segundo argumento. La corrida 648 lo',
+        '// escribio asi antes de que se notara. La forma de objeto vale en los dos.',
+        '',
+        '// La rama de Gmail corre antes que esta: executionOrder v1 ordena por',
+        '// posicion y el nodo de busqueda esta mas arriba. Si aun asi no hubiera',
+        '// corrido, queda null y no un 0, que diria "revise y no habia nada" sin',
+        '// haber revisado.',
+        'let correos = null;',
+        'try {',
+        '  correos = $("Buscar correos del colegio").all().length;',
+        '} catch (e) {',
+        '  correos = null;',
+        '}',
         '',
         'const cabecera = "/* GENERADO AUTOMATICAMENTE POR n8n - NO EDITAR A MANO." + NL +',
         '  "   Lo reescribe el workflow Resumen diario correos Colegio Almenar en CADA" + NL +',
         '  "   corrida, tambien en los dias sin correos del colegio. Es el latido que" + NL +',
         '  "   permite distinguir \\"reviso y no habia nada\\" de \\"lleva dias sin correr\\"." + NL +',
+        '  NL +',
+        '  "   - revisado:     instante en que corrio el proceso." + NL +',
+        '  "   - ventanaDesde: desde que momento busco correos esa corrida. Dice hasta" + NL +',
+        '  "                   donde alcanza de verdad la revision automatica, en vez de" + NL +',
+        '  "                   dejarlo escrito a mano en data.js." + NL +',
+        '  "   - correos:      cuantos correos del colegio encontro. 0 es un dia tranquilo;" + NL +',
+        '  "                   null es \\"no se pudo saber\\", que no es lo mismo." + NL +',
+        '  NL +',
         '  "   Lo que se edita a mano va en data.js, que n8n nunca toca. */" + NL + NL;',
         '',
-        'const cuerpo = { revisado: $now.toISO() };',
+        'const cuerpo = {',
+        '  revisado: $now.toISO(),',
+        '  ventanaDesde: $now.minus({ hours: HORAS_VENTANA }).toISO(),',
+        '  correos: correos',
+        '};',
         '',
         'return [{ json: {',
         '  contenido: cabecera + "const PORTAL_ESTADO = " + JSON.stringify(cuerpo, null, 2) + ";" + NL',
@@ -567,7 +605,10 @@ const marcarRevision = node({
     },
     position: [220, 900]
   },
-  output: [{ contenido: 'const PORTAL_ESTADO = { "revisado": "2026-08-31T07:00:58.011-04:00" };' }]
+  output: [{
+    contenido: 'const PORTAL_ESTADO = {\n  "revisado": "2026-09-20T07:00:58.011-03:00",\n' +
+      '  "ventanaDesde": "2026-09-19T05:00:58.011-03:00",\n  "correos": 0\n};'
+  }]
 });
 
 const publicarEstado = node({
@@ -602,11 +643,14 @@ const publicarEstado = node({
 
 const notaLatido = sticky(
   '## Latido: docs/estado.js\n\n' +
-  'Escribe la fecha de ESTA corrida en `docs/estado.js` del repo `ks-almenar`, **siempre**, aunque no haya llegado ningun correo.\n\n' +
+  'Escribe en `docs/estado.js` del repo `ks-almenar`, **siempre**, aunque no haya llegado ningun correo: cuando corrio (`revisado`), desde cuando busco (`ventanaDesde`) y cuantos correos encontro (`correos`).\n\n' +
   '### Por que cuelga del trigger y no de Gmail\n' +
   'Cuando la busqueda de Gmail vuelve vacia, la ejecucion se detiene en ese nodo y **nada** rio abajo se ejecuta (verificado en la ejecucion 469: 0,6 s y `lastNodeExecuted: Buscar correos del colegio`). Si el latido colgara de ahi, faltaria justo los dias en que mas importa saber que el proceso corrio.\n\n' +
+  'El conteo de correos igual sale del nodo de Gmail, leido con `$("Buscar correos del colegio")`: esa rama corre primero porque executionOrder v1 ordena por posicion. Si no corriera, el campo queda en `null`, que el portal muestra distinto de `0`.\n\n' +
   '### Para que sirve\n' +
-  'La cabecera del portal cruza dos archivos: `auto.js` (solo cambia cuando hay novedades) y `estado.js` (cambia todos los dias). Con los dos puede mostrar "revisado hoy, sin novedades" y avisar en rojo si pasan mas de 30 h sin corrida.\n\n' +
+  'La cabecera del portal cruza dos archivos: `auto.js` (solo cambia cuando hay novedades) y `estado.js` (cambia todos los dias). Con los dos muestra "correo revisado hoy 07:00 - sin correos", avisa en rojo si pasan mas de 30 h sin corrida, y deja de depender de un texto escrito a mano para decir hasta donde llega la revision.\n\n' +
+  '### Lo que NO prueba\n' +
+  'Que el cron disparo, no que la revision sirvio. Si la credencial de Gmail caduca o una profesora cambia de correo, el latido sigue verde. Por eso guarda `correos`: varios dias seguidos en 0 fuera de vacaciones es la senal de mirar la query.\n\n' +
   'Escribe en `docs/estado.js` y en ningun otro archivo.',
   [marcarRevision, publicarEstado],
   { color: 3 }
