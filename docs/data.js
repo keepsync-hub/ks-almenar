@@ -80,14 +80,35 @@ const PORTAL = {
     },
     {
       fecha: '2026-09-21',
-      fechaFin: '2026-09-25',
+      fechaFin: '2026-09-26',
       curso: 'cuartob',
       titulo: 'Proyecto Institucional: Cine sin Fronteras',
       tipo: 'Proyecto',
-      detalle: 'Comienza al volver de Fiestas Patrias. Cada niño participa en un taller con compañeros de otros cursos. A 4° B le toca la Alianza Ciencia Ficción, color rojo.',
-      nota: 'El cronograma del colegio lo marca "21-26", pero el 26 es sábado: acá queda hasta el viernes 25 mientras no lo confirmen.',
-      accion: null,
-      origen: 'Francisca Bravo · 10-08-2026 + Cronograma 2° semestre'
+      detalle: 'Comienza al volver de Fiestas Patrias. Cada niño participa en el taller que eligió, con compañeros de otros cursos. A 4° B le toca la Alianza Ciencia Ficción: vienen vestidos de rojo toda la semana. No se sigue el horario habitual de asignaturas y no hay talleres deportivos, artísticos ni academias en la tarde. El cierre es el sábado 26, abierto a las familias que puedan ir.',
+      nota: 'El cronograma lo marcaba "21-26" y el correo del 9 de septiembre confirma que el cierre es el sábado 26.',
+      accion: 'Mandarla vestida de rojo',
+      origen: 'Francisca Bravo · 09-09-2026 y 21-09-2026 + Cronograma 2° semestre'
+    },
+    {
+      fecha: '2026-09-21',
+      fechaFin: '2026-09-24',
+      hora: 'Salida: Kínder 15:15 · 4° B 15:30',
+      curso: 'colegio',
+      titulo: 'Horario de salida especial: semana del Proyecto Institucional',
+      tipo: 'Actividad',
+      detalle: 'Del lunes 21 al jueves 24 la salida es: Playgroup a Kínder 15:15, 1° a 6° básico 15:30 y 7° básico a IV medio 15:40. No hay talleres deportivos, artísticos ni academias en la tarde.',
+      accion: 'Retirar a Agustín a las 15:15 y a Olivia a las 15:30',
+      origen: 'Francisca Bravo · 21-09-2026'
+    },
+    {
+      fecha: '2026-09-25',
+      hora: 'Salida 13:15',
+      curso: 'colegio',
+      titulo: 'Salida temprano: todos a las 13:15',
+      tipo: 'Actividad',
+      detalle: 'El viernes 25 todos los cursos salen a las 13:15.',
+      accion: 'Retirar a los dos a las 13:15',
+      origen: 'Francisca Bravo · 21-09-2026'
     },
     {
       fecha: '2026-10-14',
