@@ -154,3 +154,56 @@ datos antes de publicar**. Si una corrida de n8n produjera un `auto.js` malforma
 detiene y el portal sigue mostrando la última versión buena.
 
 Para ver si la última corrida publicó, la pestaña **Actions** del repositorio.
+
+### Si una corrida falla: reintentos y avisos
+
+**Lo que pasó el 22-09-2026 (ejecución `663`).** Llegó el correo de Francisca
+Bravo con el horario de salida de la semana del Proyecto Institucional. El
+resumen por correo salió, pero `Parser de novedades` rechazó la respuesta del
+modelo y la rama del portal murió ahí. El parser armaba su schema a partir de un
+JSON de ejemplo (`schemaType: fromJson`), y eso vuelve **obligatorio y de tipo
+string** cada campo del ejemplo. El modelo devolvió `"hora": null` y
+`"lugar": null`, que es lo correcto cuando el correo no los trae, y el schema lo
+rechazó. Como la corrida siguiente solo busca desde 26 h atrás, ese correo nunca
+iba a llegar al portal por sí solo. Nadie se enteró, porque el workflow no tenía
+cómo avisar.
+
+**Qué cambió (versión publicada el 23-09-2026):**
+
+| Cambio | Dónde |
+| --- | --- |
+| Schema explícito (`schemaType: manual`): solo `curso` y `titulo`/`texto` son obligatorios, el resto acepta `null` | `Parser de novedades` |
+| 3 intentos, 5 s entre cada uno | Nodos que llaman a Gmail, OpenRouter y GitHub |
+| `errorWorkflow` = `Vigilancia resumen Colegio Almenar` | Settings del workflow |
+
+El schema nuevo se probó antes de publicarlo: un workflow temporal le pasó
+exactamente la salida que falló en la `663` y la aceptó (ejecución `671`). Ese
+workflow ya está archivado.
+
+## Vigilancia resumen Colegio Almenar
+
+- **Workflow n8n:** `Vigilancia resumen Colegio Almenar` (ID `qmr586Iw4600vHAx`)
+- **Fuente SDK:** [`vigilancia-colegio-almenar.ts`](./vigilancia-colegio-almenar.ts)
+
+Cubre las dos formas de fallar que el resumen no puede avisar por sí mismo:
+
+| Rama | Cuándo | Qué hace |
+| --- | --- | --- |
+| `Cuando falla el resumen` (Error Trigger) | Una ejecución de producción del resumen termina en error, aun después de los reintentos | Manda a cristian0907@gmail.com un correo `FALLA: …` con el nodo que falló, el error, el link a la ejecución y si el portal quedó sin actualizar |
+| `Comprobar a las 09:00 que corrio` (Schedule) | Todos los días a las 09:00 America/Santiago | Lee `docs/estado.js` en `main`. Si `revisado` no es de hoy, manda un correo `SIN REVISION: …`. Si todo está bien, no manda nada |
+
+La segunda rama existe porque el Error Trigger solo se dispara cuando una
+ejecución empieza y falla. Si el cron no dispara, si el workflow queda
+despublicado o si n8n está caído, no hay ejecución que falle y el Error Trigger
+no se entera. El latido de `estado.js` sí lo muestra.
+
+Usa las mismas credenciales que el resumen: `Gmail account` (cristian0907@gmail.com)
+y `GitHub OAuth2 API`.
+
+Probado el 23-09-2026 (ejecución `670`): leyó el latido de las 07:01 de ese día
+y no mandó nada, que es lo esperado.
+
+**Qué hacer cuando llega un aviso:** abrir la ejecución del link. Si el fallo fue
+en la rama del portal, los correos de ese día no van a entrar solos al portal:
+hay que cargarlos a mano en `data.js`. Pedírselo a Claude con el ID de la
+ejecución también sirve, porque la ejecución guarda los correos que leyó.

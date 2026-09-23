@@ -35,6 +35,9 @@ const buscarCorreos = node({
       options: { downloadAttachments: false }
     },
     credentials: { gmailOAuth2: { id: 'o7zgkcSK3TETNTZv', name: 'Gmail account' } },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [220, 0]
   },
   output: [
@@ -170,6 +173,9 @@ const generarResumen = node({
       batching: { batchSize: 1, delayBetweenBatches: 0 }
     },
     subnodes: { model: modeloResumen },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [660, 0]
   },
   output: [
@@ -198,6 +204,9 @@ const enviarResumen = node({
       options: { appendAttribution: false, senderName: 'Resumen Colegio Almenar' }
     },
     credentials: { gmailOAuth2: { id: 'o7zgkcSK3TETNTZv', name: 'Gmail account' } },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [880, 0]
   },
   output: [{ id: '19a2b3c4d5e6f708', threadId: '19a2b3c4d5e6f708', labelIds: ['SENT'] }]
@@ -220,6 +229,9 @@ const leerAuto = node({
       additionalParameters: { reference: 'main' }
     },
     credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [660, 420]
   },
   output: [{ name: 'auto.js', path: 'docs/auto.js', sha: '5660bc7', content: 'Y29uc3QgUE9SVEFMX0FVVE8gPSB7fTsK', encoding: 'base64' }]
@@ -242,6 +254,9 @@ const leerData = node({
       additionalParameters: { reference: 'main' }
     },
     credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [790, 540]
   },
   output: [{ name: 'data.js', path: 'docs/data.js', sha: 'aa11bb2', content: 'Y29uc3QgUE9SVEFMID0ge307Cg==', encoding: 'base64' }]
@@ -297,12 +312,31 @@ const parserNovedades = outputParser({
   config: {
     name: 'Parser de novedades',
     parameters: {
-      schemaType: 'fromJson',
-      jsonSchemaExample:
+      // Schema explicito y no inferido de un ejemplo: con 'fromJson' todos los
+      // campos quedaban como string obligatorio, y un null en hora o lugar
+      // (que es lo correcto cuando el correo no los da) tumbaba la corrida
+      // entera. Paso en la ejecucion 663 del 22-09-2026 y el correo del
+      // horario de salida del Proyecto Institucional no llego al portal.
+      schemaType: 'manual',
+      autoFix: false,
+      inputSchema:
         '{\n' +
-        '  "eventos": [{ "fecha": "2026-09-05", "curso": "cuartob", "titulo": "Salida pedagogica", "tipo": "Actividad", "detalle": "Descripcion breve.", "hora": "08:30", "lugar": "Gimnasio", "accion": "Firmar autorizacion", "origen": "Francisca Bravo - 05-09-2026" }],\n' +
-        '  "recordatorios": [{ "curso": "cuartob", "texto": "Firmar la autorizacion", "prioridad": "alta", "nota": "Contexto adicional.", "vence": "2026-09-04", "origen": "Francisca Bravo - 05-09-2026" }],\n' +
-        '  "evaluaciones": [{ "fecha": "2026-09-22", "curso": "cuartob", "asignatura": "Matematica", "titulo": "Prueba de fracciones", "formato": "Prueba escrita", "estado": "proxima", "detalle": "Contenidos que entran.", "origen": "Francisca Bravo - 05-09-2026" }]\n' +
+        '  "type": "object",\n' +
+        '  "required": ["eventos", "recordatorios", "evaluaciones"],\n' +
+        '  "properties": {\n' +
+        '    "eventos": { "type": "array", "items": { "type": "object", "required": ["curso", "titulo"], "properties": {\n' +
+        '      "fecha": { "type": ["string", "null"] },\n      "curso": { "type": "string" },\n      "titulo": { "type": "string" },\n' +
+        '      "tipo": { "type": ["string", "null"] },\n      "detalle": { "type": ["string", "null"] },\n      "hora": { "type": ["string", "null"] },\n      "lugar": { "type": ["string", "null"] },\n      "accion": { "type": ["string", "null"] },\n      "origen": { "type": ["string", "null"] }\n' +
+        '    } } },\n' +
+        '    "recordatorios": { "type": "array", "items": { "type": "object", "required": ["curso", "texto"], "properties": {\n' +
+        '      "curso": { "type": "string" },\n      "texto": { "type": "string" },\n' +
+        '      "prioridad": { "type": ["string", "null"] },\n      "nota": { "type": ["string", "null"] },\n      "vence": { "type": ["string", "null"] },\n      "origen": { "type": ["string", "null"] }\n' +
+        '    } } },\n' +
+        '    "evaluaciones": { "type": "array", "items": { "type": "object", "required": ["curso", "titulo"], "properties": {\n' +
+        '      "fecha": { "type": ["string", "null"] },\n      "curso": { "type": "string" },\n      "asignatura": { "type": ["string", "null"] },\n      "titulo": { "type": "string" },\n' +
+        '      "formato": { "type": ["string", "null"] },\n      "estado": { "type": ["string", "null"] },\n      "detalle": { "type": ["string", "null"] },\n      "origen": { "type": ["string", "null"] }\n' +
+        '    } } }\n' +
+        '  }\n' +
         '}'
     },
     position: [1060, 660]
@@ -359,6 +393,9 @@ const extraerNovedades = node({
       )
     },
     subnodes: { model: modeloExtractor, outputParser: parserNovedades },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [880, 420]
   },
   output: [{ output: { eventos: [], recordatorios: [], evaluaciones: [] } }]
@@ -531,6 +568,9 @@ const publicarAuto = node({
       additionalParameters: { branch: { branch: 'main' } }
     },
     credentials: { githubOAuth2Api: { id: 'RpMUyc4ecL1CPsy3', name: 'GitHub OAuth2 API' } },
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
     position: [1540, 420]
   },
   output: [{ commit: { sha: '816822d' } }]
@@ -674,6 +714,11 @@ const notaConfiguracion = sticky(
   { color: 4 }
 );
 
+// Settings del workflow (no los expresa el SDK; se fijan en n8n):
+//   timezone: America/Santiago, executionOrder: v1,
+//   errorWorkflow: qmr586Iw4600vHAx ("Vigilancia resumen Colegio Almenar",
+//   fuente en vigilancia-colegio-almenar.ts). Avisa por correo si una
+//   ejecucion de produccion falla.
 export default workflow('resumen-colegio-almenar', 'Resumen diario correos Colegio Almenar')
   .add(revisarDiario)
   .to(buscarCorreos)
