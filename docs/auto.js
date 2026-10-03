@@ -3,8 +3,20 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-09-30T10:01:35.521Z",
-  "eventos": [],
+  "generado": "2026-10-03T10:01:17.750Z",
+  "eventos": [
+    {
+      "fecha": "2026-10-13",
+      "curso": "kinder",
+      "titulo": "Reunión informativa: \"Día de aventuras y tesoros\"",
+      "tipo": "Reunion",
+      "detalle": "Reunión para compartir la planificación y cronograma de la actividad \"Día de aventuras y tesoros\", que se realizará el 27 de noviembre. Es obligatoria la asistencia de al menos un representante por niño/a.",
+      "hora": "08:30",
+      "lugar": "Biblioteca del colegio",
+      "accion": "Asistir — mínimo un representante por niño/a",
+      "origen": "Cynthia Argandoña · 02-10-2026"
+    }
+  ],
   "recordatorios": [
     {
       "curso": "cuartob",
@@ -14,6 +26,15 @@ const PORTAL_AUTO = {
       "vence": null,
       "origen": "Francisca Bravo Hernández · 29-09-2026",
       "id": "auto-cuartob||reforzar-con-los-ninos-que-deben-permanecer-dentro-del-colegio-hasta-ser-retirados-por-el-adulto-responsable-sin-salir-por-iniciativa-propia"
+    },
+    {
+      "curso": "kinder",
+      "texto": "Asistir a la reunión del martes 13 de octubre sobre el \"Día de aventuras y tesoros\"",
+      "prioridad": "alta",
+      "nota": "A las 08:30 en la biblioteca. Se requiere mínimo un representante por niño/a. La actividad en sí se realizará el viernes 27 de noviembre.",
+      "vence": "2026-10-13",
+      "origen": "Cynthia Argandoña · 02-10-2026",
+      "id": "auto-kinder||asistir-a-la-reunion-del-martes-13-de-octubre-sobre-el-dia-de-aventuras-y-tesoros"
     }
   ],
   "evaluaciones": []
