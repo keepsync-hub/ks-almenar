@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-03T10:01:17.750Z",
+  "generado": "2026-10-08T10:01:14.527Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -35,6 +35,15 @@ const PORTAL_AUTO = {
       "vence": "2026-10-13",
       "origen": "Cynthia Argandoña · 02-10-2026",
       "id": "auto-kinder||asistir-a-la-reunion-del-martes-13-de-octubre-sobre-el-dia-de-aventuras-y-tesoros"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Enviar firmada la autorización de la Charla Nosotras",
+      "prioridad": "urgente",
+      "nota": "Plazo máximo: viernes 9 de octubre. El documento viene adjunto en el correo.",
+      "vence": "2026-10-09",
+      "origen": "Francisca Bravo Hernández · 07-10-2026",
+      "id": "auto-cuartob||enviar-firmada-la-autorizacion-de-la-charla-nosotras"
     }
   ],
   "evaluaciones": []
