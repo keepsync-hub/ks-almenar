@@ -122,6 +122,25 @@ aunque la fecha sea aproximada: si no, se queda en el portal para siempre.
 Los recordatorios que detecta n8n nunca quedan sin `vence`: si el correo no trae
 fecha, el workflow les pone 30 días.
 
+### Las evaluaciones generan su propio recordatorio
+
+No hace falta copiar cada prueba como recordatorio: el portal crea uno por cada
+evaluación con fecha ("Preparar la evaluación de Inglés del jue 15 de oct.: …"),
+con chip **Evaluación**, `vence` en el día de la prueba y prioridad según cercanía
+(urgente a 2 días o menos, alta a 7 días o menos, media el resto).
+
+Si se quiere un recordatorio escrito a mano para una evaluación (algo más
+concreto, como preparar una caracterización), se le pone el **mismo `ref`** que a
+la evaluación y el generado deja de aparecer:
+
+```js
+// en evaluaciones.items
+{ fecha: '2026-10-14', ref: 'english-day-kinder', curso: 'kinder', ... }
+
+// en recordatorios
+{ id: 'caracterizacion-english', ref: 'english-day-kinder', curso: 'kinder', ... }
+```
+
 ## Agregar una evaluación
 
 ```js

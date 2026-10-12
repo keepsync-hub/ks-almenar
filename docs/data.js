@@ -356,6 +356,7 @@ const PORTAL = {
     },
     {
       id: 'caracterizacion-english',
+      ref: 'english-day-kinder',
       curso: 'kinder',
       texto: 'Preparar la caracterización para el English Day',
       prioridad: 'media',
@@ -365,6 +366,7 @@ const PORTAL = {
     },
     {
       id: 'ensayo-cancion',
+      ref: 'english-day-kinder',
       curso: 'kinder',
       texto: 'Practicar en casa la canción y el guión de "Are you my mom?"',
       prioridad: 'media',

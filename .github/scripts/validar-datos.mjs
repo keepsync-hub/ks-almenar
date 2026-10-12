@@ -248,6 +248,16 @@ const ids = new Set();
   ids.add(r.id);
 });
 
+// Un recordatorio con `ref` reemplaza al que el portal genera para la
+// evaluacion con ese mismo `ref`. Si el ref no apunta a ninguna, no reemplaza
+// nada y la evaluacion sale dos veces: casi seguro es un error de tipeo.
+const refsEval = new Set([...evaCur, ...evaAuto].map((ev) => ev.ref).filter(Boolean));
+[...reCur, ...reAuto].forEach((r) => {
+  if (r.ref && !refsEval.has(r.ref)) {
+    avisos.push('recordatorio "' + (r.id || r.texto) + '": ref "' + r.ref + '" no coincide con ninguna evaluacion');
+  }
+});
+
 console.log('Curado   (data.js): ' + evCur.length + ' eventos, ' + reCur.length + ' recordatorios, ' + evaCur.length + ' evaluaciones');
 console.log('Automatico (auto.js): ' + evAuto.length + ' eventos, ' + reAuto.length + ' recordatorios, ' + evaAuto.length + ' evaluaciones');
 console.log('Ultima novedad automatica: ' + (AUTO.generado || 'todavia ninguna'));

@@ -162,11 +162,54 @@
     };
   }
 
+  /* ---------- recordatorios que salen de las evaluaciones ----------
+     Antes solo existían los recordatorios escritos a mano, así que una prueba
+     del calendario aparecía en Recordatorios únicamente si alguien se acordaba
+     de copiarla (la de Inglés del 15 de octubre nunca se copió). Ahora cada
+     evaluación con fecha trae su propio recordatorio. Si ya hay uno curado que
+     la cubre (preparar la caracterización del English Day), se le pone el
+     mismo `ref` que a la evaluación y el generado no se agrega: el vínculo es
+     explícito, igual que entre eventos y evaluaciones. */
+
+  // Lo cercano sube solo: la prioridad se calcula contra hoy, no se escribe.
+  function prioridadPorCercania(fecha) {
+    var d = diasHasta(fecha);
+    if (d <= 2) { return 'urgente'; }
+    if (d <= 7) { return 'alta'; }
+    return 'media';
+  }
+
+  function recordatorioDeEvaluacion(ev) {
+    var f = aFecha(ev.fecha);
+    var cuando = SEMANA[f.getDay()] + ' ' + f.getDate() + ' de ' + MESES[f.getMonth()] + '.';
+    var nota = [ev.formato, ev.detalle].filter(Boolean).join('. ');
+    return {
+      id: 'eval-' + claveEval(ev),
+      curso: ev.curso,
+      texto: 'Preparar la evaluación de ' + ev.asignatura + ' del ' + cuando + ': ' + ev.titulo,
+      prioridad: prioridadPorCercania(ev.fecha),
+      nota: nota || null,
+      vence: ev.fecha,
+      origen: ev.origen,
+      deEvaluacion: true
+    };
+  }
+
+  function conRecordatoriosDeEvaluaciones(recordatorios, evaluaciones) {
+    var cubiertas = {};
+    recordatorios.forEach(function (r) { if (r.ref) { cubiertas[r.ref] = true; } });
+    var generados = evaluaciones
+      .filter(function (ev) { return ev.fecha && !(ev.ref && cubiertas[ev.ref]); })
+      .map(recordatorioDeEvaluacion);
+    return recordatorios.concat(generados);
+  }
+
   var AUTO = (typeof PORTAL_AUTO !== 'undefined' && PORTAL_AUTO) ? PORTAL_AUTO : {};
   var ESTADO = (typeof PORTAL_ESTADO !== 'undefined' && PORTAL_ESTADO) ? PORTAL_ESTADO : {};
   var EVENTOS       = fusionar(PORTAL.eventos, AUTO.eventos);
-  var RECORDATORIOS = fusionar(PORTAL.recordatorios, AUTO.recordatorios);
   var EVALUACIONES  = fusionar(PORTAL.evaluaciones.items, AUTO.evaluaciones);
+  var RECORDATORIOS = conRecordatoriosDeEvaluaciones(
+    fusionar(PORTAL.recordatorios, AUTO.recordatorios), EVALUACIONES);
 
   function vaciar(nodo) {
     while (nodo.firstChild) { nodo.removeChild(nodo.firstChild); }
@@ -403,6 +446,7 @@
     meta.appendChild(chipCurso(r.curso));
     if (r.prioridad === 'urgente') { meta.appendChild(el('span', 'chip chip--rosa', 'Urgente')); }
     if (r.prioridad === 'habito')  { meta.appendChild(el('span', 'chip chip--menta', 'Hábito diario')); }
+    if (r.deEvaluacion) { meta.appendChild(el('span', 'chip chip--lila', 'Evaluación')); }
     if (r.auto) { meta.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (r.vence) {
       var d = diasHasta(r.vence);
