@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-08T10:01:14.527Z",
+  "generado": "2026-10-14T10:01:34.078Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -15,6 +15,17 @@ const PORTAL_AUTO = {
       "lugar": "Biblioteca del colegio",
       "accion": "Asistir — mínimo un representante por niño/a",
       "origen": "Cynthia Argandoña · 02-10-2026"
+    },
+    {
+      "fecha": "2026-11-03",
+      "curso": "cuartob",
+      "titulo": "Entierro del Tesoro — 4° básico",
+      "tipo": "Actividad",
+      "detalle": "Cada niño/a prepara una carta a su \"yo del futuro\" y una cápsula del tiempo con recuerdos personales y familiares. El cierre y entierro del tesoro se coordina con las directivas de 4° A y 4° B.",
+      "hora": null,
+      "lugar": null,
+      "accion": "Enviar materiales según cronograma: libreta el 14/10, cartas de la familia entre el 22 y 28/10, 4 bolsas ziploc grandes con nombre, y caja plástica lista para el 3/11",
+      "origen": "Francisca Bravo Hernández · 13-10-2026"
     }
   ],
   "recordatorios": [
@@ -44,6 +55,33 @@ const PORTAL_AUTO = {
       "vence": "2026-10-09",
       "origen": "Francisca Bravo Hernández · 07-10-2026",
       "id": "auto-cuartob||enviar-firmada-la-autorizacion-de-la-charla-nosotras"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Mandar mañana (14/10) una agenda, libreta o cuaderno para el borrador de la carta del Entierro del Tesoro",
+      "prioridad": "urgente",
+      "nota": "Es el primer material necesario para arrancar la actividad en clases.",
+      "vence": "2026-10-14",
+      "origen": "Francisca Bravo Hernández · 13-10-2026",
+      "id": "auto-cuartob||mandar-manana-14-10-una-agenda-libreta-o-cuaderno-para-el-borrador-de-la-carta-del-entierro-del-tesoro"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Enviar la carta familiar y 4 bolsas ziploc grandes (con nombre y apellido del estudiante) a secretaría (Érika) entre el 22 y el 28 de octubre",
+      "prioridad": "alta",
+      "nota": "Las cartas y fotografías familiares se incorporan al tesoro. Plazo máximo: 28 de octubre.",
+      "vence": "2026-10-28",
+      "origen": "Francisca Bravo Hernández · 13-10-2026",
+      "id": "auto-cuartob||enviar-la-carta-familiar-y-4-bolsas-ziploc-grandes-con-nombre-y-apellido-del-estudiante-a-secretaria-erika-entre-el-22-y-el-28-de-octubre"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "La directiva de 4° B debe tener lista la caja plástica con los materiales solicitados para el 3 de noviembre",
+      "prioridad": "media",
+      "nota": "La caja es compartida con la directiva de 4° A. Ver detalle de materiales en el comunicado adjunto.",
+      "vence": "2026-11-03",
+      "origen": "Francisca Bravo Hernández · 13-10-2026",
+      "id": "auto-cuartob||la-directiva-de-4-b-debe-tener-lista-la-caja-plastica-con-los-materiales-solicitados-para-el-3-de-noviembre"
     }
   ],
   "evaluaciones": []
