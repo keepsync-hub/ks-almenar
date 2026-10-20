@@ -434,8 +434,10 @@
     input.type = 'checkbox';
     input.className = 'recordatorio__caja';
     input.checked = !!marcados[r.id];
+    input.dataset.id = r.id;
     input.addEventListener('change', function () {
       guardarMarcado(r.id, input.checked);
+      if (!vencido) { pintarRecordatorios(r.id); }
     });
 
     var contenido = el('div', 'recordatorio__contenido');
@@ -447,6 +449,7 @@
     if (r.prioridad === 'urgente') { meta.appendChild(el('span', 'chip chip--rosa', 'Urgente')); }
     if (r.prioridad === 'habito')  { meta.appendChild(el('span', 'chip chip--menta', 'Hábito diario')); }
     if (r.deEvaluacion) { meta.appendChild(el('span', 'chip chip--lila', 'Evaluación')); }
+    if (r.deAgenda) { meta.appendChild(el('span', 'chip chip--lila', 'De la agenda')); }
     if (r.auto) { meta.appendChild(el('span', 'chip chip--lila', 'Detectado automáticamente')); }
     if (r.vence) {
       var d = diasHasta(r.vence);
@@ -465,18 +468,101 @@
     return li;
   }
 
-  function pintarRecordatorios() {
+  /* ---------- acciones que vienen de la agenda ----------
+     Muchas actividades piden algo a la familia ("Asistir", "Reservar la
+     tarde") y eso solo se veía dentro de la tarjeta de la agenda. Ahora cada
+     actividad futura con `accion` aparece también en "Qué hacer". No se agrega
+     si ya hay un recordatorio que la cubre: mismo `ref`, o (para lo detectado
+     por n8n) un recordatorio automático del mismo correo, que suele detallar
+     mejor lo mismo. */
+  function accionesDeAgenda(recordatorios) {
+    var refs = {};
+    var origenes = {};
+    recordatorios.forEach(function (r) {
+      if (r.ref) { refs[r.ref] = true; }
+      if (r.auto && r.origen) { origenes[r.origen] = true; }
+    });
+    return EVENTOS
+      .filter(function (ev) {
+        return ev.accion && ev.fecha && ev.tipo !== 'Sin clases' &&
+          diasHasta(ev.fecha) >= 0 &&
+          !(ev.ref && refs[ev.ref]) &&
+          !(ev.auto && origenes[ev.origen]);
+      })
+      .map(function (ev) {
+        var donde = [fechaODeRango(ev), ev.hora, ev.lugar].filter(Boolean).join(' · ');
+        return {
+          id: 'agenda-' + claveItem(ev),
+          curso: ev.curso,
+          texto: ev.titulo + ': ' + ev.accion,
+          nota: donde,
+          prioridad: prioridadPorCercania(ev.fecha),
+          vence: ev.fecha,
+          origen: ev.origen,
+          deAgenda: true
+        };
+      });
+  }
+
+  /* Los grupos responden a "¿cuándo tengo que hacerlo?". Lo urgente sin fecha
+     (revisar piojos) va arriba; lo que no vence pero tampoco apura queda en
+     "Sin fecha límite"; las reglas permanentes, al final. */
+  var GRUPOS = [
+    { clave: 'ahora',    titulo: 'Para hoy y mañana' },
+    { clave: 'semana',   titulo: 'Esta semana' },
+    { clave: 'despues',  titulo: 'Más adelante' },
+    { clave: 'sinfecha', titulo: 'Sin fecha límite' },
+    { clave: 'siempre',  titulo: 'Siempre (hábitos)' },
+    { clave: 'hecho',    titulo: 'Ya hecho' }
+  ];
+
+  function grupoDe(r, marcados) {
+    if (marcados[r.id]) { return 'hecho'; }
+    if (r.prioridad === 'habito') { return 'siempre'; }
+    if (!r.vence) { return r.prioridad === 'urgente' ? 'ahora' : 'sinfecha'; }
+    var d = diasHasta(r.vence);
+    if (d <= 1) { return 'ahora'; }
+    if (d <= 7) { return 'semana'; }
+    return 'despues';
+  }
+
+  // Dentro de cada grupo manda la fecha; a igual fecha, la prioridad.
+  function compararRecordatorios(a, b) {
+    var fa = a.vence ? aFecha(a.vence).getTime() : Infinity;
+    var fb = b.vence ? aFecha(b.vence).getTime() : Infinity;
+    if (fa !== fb) { return fa - fb; }
+    return peso(a.prioridad) - peso(b.prioridad);
+  }
+
+  function pintarResumen(porGrupo) {
+    var cont = document.getElementById('resumenAcciones');
+    vaciar(cont);
+    [
+      { clave: 'ahora',   texto: 'hoy y mañana', tono: 'rosa' },
+      { clave: 'semana',  texto: 'esta semana',  tono: 'durazno' },
+      { clave: 'despues', texto: 'más adelante', tono: 'papel' }
+    ].forEach(function (g) {
+      var n = (porGrupo[g.clave] || []).length;
+      var caja = el('a', 'resumen__caja' + (n ? '' : ' resumen__caja--cero'));
+      caja.href = '#grupo-' + g.clave;
+      caja.style.background = 'var(--' + g.tono + ')';
+      caja.appendChild(el('span', 'resumen__num', String(n)));
+      caja.appendChild(el('span', 'resumen__txt', g.texto));
+      cont.appendChild(caja);
+    });
+  }
+
+  function pintarRecordatorios(idEnfocar) {
     var cont = document.getElementById('listaRecordatorios');
     vaciar(cont);
 
     var marcados = leerMarcados();
-    var items = RECORDATORIOS.filter(function (r) { return visible(r.curso); });
+    var base = RECORDATORIOS.concat(accionesDeAgenda(RECORDATORIOS));
+    var items = base.filter(function (r) { return visible(r.curso); });
 
     // Sin `vence` no caduca: eso queda reservado para las reglas permanentes del
     // curso ("mandar la agenda todos los días"), que hoy siguen siendo verdad.
-    var activos = items
-      .filter(function (r) { return !r.vence || diasHasta(r.vence) >= 0; })
-      .sort(function (a, b) { return peso(a.prioridad) - peso(b.prioridad); });
+    var activos = items.filter(function (r) { return !r.vence || diasHasta(r.vence) >= 0; });
 
     // Lo vencido sale de la lista activa y del contador al día siguiente, pero
     // se queda un mes a la vista: sirve para confirmar que algo se hizo, no para
@@ -489,21 +575,48 @@
       })
       .sort(function (a, b) { return aFecha(b.vence) - aFecha(a.vence); });
 
+    var porGrupo = {};
+    activos.forEach(function (r) {
+      var g = grupoDe(r, marcados);
+      (porGrupo[g] = porGrupo[g] || []).push(r);
+    });
+
     var pendientes = activos.filter(function (r) { return !marcados[r.id]; }).length;
     document.getElementById('conteoRecordatorios').textContent = pendientes;
+    pintarResumen(porGrupo);
 
     if (!activos.length) {
       cont.appendChild(mensajeVacio(vencidos.length
         ? 'No queda nada pendiente para este filtro.'
-        : 'No hay recordatorios para este filtro.'));
+        : 'No hay nada que hacer para este filtro.'));
     }
-    activos.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados, false)); });
+
+    GRUPOS.forEach(function (g) {
+      var lista = porGrupo[g.clave];
+      if (!lista || !lista.length) { return; }
+      lista.sort(compararRecordatorios);
+      var separador = el('li');
+      var h = el('h3', 'lista__separador lista__separador--' + g.clave, g.titulo + ' · ' + lista.length);
+      h.id = 'grupo-' + g.clave;
+      separador.appendChild(h);
+      cont.appendChild(separador);
+      lista.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados, false)); });
+    });
 
     if (vencidos.length) {
-      var separador = el('li');
-      separador.appendChild(el('h3', 'lista__separador', 'Vencidos'));
-      cont.appendChild(separador);
+      var sepV = el('li');
+      sepV.appendChild(el('h3', 'lista__separador', 'Vencidos'));
+      cont.appendChild(sepV);
       vencidos.forEach(function (r) { cont.appendChild(tarjetaRecordatorio(r, marcados, true)); });
+    }
+
+    // Marcar algo lo cambia de grupo; el foco sigue a la casilla para no
+    // perder el lugar al usar teclado.
+    if (idEnfocar) {
+      var cajas = cont.querySelectorAll('.recordatorio__caja');
+      for (var i = 0; i < cajas.length; i++) {
+        if (cajas[i].dataset.id === idEnfocar) { cajas[i].focus(); break; }
+      }
     }
   }
 
@@ -1226,9 +1339,9 @@
   }
 
   function pintarTodo() {
+    pintarRecordatorios();
     pintarRegresiva();
     pintarAgenda();
-    pintarRecordatorios();
     pintarEvaluaciones();
     // El selector define la evaluación activa, así que va antes del calendario.
     pintarSelectorEvaluaciones();

@@ -20,7 +20,7 @@
     <div class="cabecera__marca">
       <h1>Portal Almenar</h1>
     </div>
-    <p class="cabecera__sub">Agenda, actividades próximas, recordatorios y evaluaciones de Kínder A y 4° B.</p>
+    <p class="cabecera__sub">Qué hay que hacer en casa, y cuándo, para Kínder A y 4° B.</p>
     <div class="cabecera__meta">
       <span class="placa" id="placaHoy">—</span>
       <span class="placa" id="placaSync">—</span>
@@ -31,9 +31,9 @@
 <nav class="navegacion" aria-label="Secciones del portal">
   <div class="envoltura">
     <ul class="navegacion__lista">
+      <li><a href="#recordatorios">Qué hacer</a></li>
       <li><a href="#proximo">Lo próximo</a></li>
       <li><a href="#agenda">Agenda</a></li>
-      <li><a href="#recordatorios">Recordatorios</a></li>
       <li><a href="#evaluaciones">Evaluaciones</a></li>
     </ul>
   </div>
@@ -50,6 +50,16 @@
 
   <p class="visually-hidden" aria-live="polite" id="anuncioFiltro"></p>
 
+  <section class="seccion seccion--foco" id="recordatorios" aria-labelledby="tituloRecordatorios">
+    <div class="seccion__encabezado">
+      <h2 id="tituloRecordatorios">Qué hacer</h2>
+      <span class="seccion__conteo" id="conteoRecordatorios">0</span>
+    </div>
+    <p class="seccion__nota">Lo que hay que hacer en casa, ordenado por cuándo hay que hacerlo. Incluye lo que piden las actividades de la agenda y las evaluaciones. Marcar una casilla la pasa a "Ya hecho" y queda guardada solo en este navegador.</p>
+    <div class="resumen" id="resumenAcciones" aria-label="Pendientes por plazo"></div>
+    <ul class="lista" id="listaRecordatorios"></ul>
+  </section>
+
   <section class="seccion" id="proximo" aria-labelledby="tituloProximo">
     <div class="seccion__encabezado">
       <h2 id="tituloProximo">Lo próximo</h2>
@@ -64,15 +74,6 @@
     </div>
     <p class="seccion__nota">Actividades confirmadas por las profesoras jefe. Lo que ya pasó queda atenuado al final y desaparece al mes.</p>
     <ul class="lista" id="listaAgenda"></ul>
-  </section>
-
-  <section class="seccion" id="recordatorios" aria-labelledby="tituloRecordatorios">
-    <div class="seccion__encabezado">
-      <h2 id="tituloRecordatorios">Recordatorios</h2>
-      <span class="seccion__conteo" id="conteoRecordatorios">0</span>
-    </div>
-    <p class="seccion__nota">Lo que hay que hacer en casa. Lo vencido baja al final por un mes y después se va. Marcar una casilla la guarda solo en este navegador, no se comparte con nadie.</p>
-    <ul class="lista" id="listaRecordatorios"></ul>
   </section>
 
   <section class="seccion" id="evaluaciones" aria-labelledby="tituloEvaluaciones">
