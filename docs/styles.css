@@ -656,3 +656,23 @@ tr.evaluacion--realizada td { opacity: 0.6; }
 /* Un chip que además es un botón */
 .chip--accion { text-decoration: none; cursor: pointer; }
 .chip--accion:hover { background: var(--tinta); color: var(--papel); }
+
+/* ---------------- Qué hacer (foco de la página) ---------------- */
+.resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--paso) * 1.5); margin-bottom: calc(var(--paso) * 3); }
+.resumen__caja {
+  border: var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: calc(var(--paso) * 1.5);
+  color: var(--tinta);
+  text-decoration: none;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.resumen__caja--cero { opacity: 0.5; }
+.resumen__num { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; line-height: 1; }
+.resumen__txt { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.lista__separador { scroll-margin-top: 68px; }
+.lista__separador--ahora { color: var(--tinta); }
+@media (max-width: 420px) {
+  .resumen { gap: var(--paso); }
+  .resumen__caja { padding: var(--paso); }
+}
