@@ -13,7 +13,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_ESTADO = {
-  "revisado": "2026-10-22T07:01:12.138-03:00",
-  "ventanaDesde": "2026-10-21T05:01:12.138-03:00",
-  "correos": 1
+  "revisado": "2026-10-23T07:01:00.507-03:00",
+  "ventanaDesde": "2026-10-22T05:01:00.507-03:00",
+  "correos": 0
 };
