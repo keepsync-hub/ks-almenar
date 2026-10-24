@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-14T10:01:34.078Z",
+  "generado": "2026-10-24T10:01:18.635Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -82,6 +82,24 @@ const PORTAL_AUTO = {
       "vence": "2026-11-03",
       "origen": "Francisca Bravo Hernández · 13-10-2026",
       "id": "auto-cuartob||la-directiva-de-4-b-debe-tener-lista-la-caja-plastica-con-los-materiales-solicitados-para-el-3-de-noviembre"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Revisar diariamente el estuche y asegurarse de que incluya lápiz grafito y los materiales básicos",
+      "prioridad": "habito",
+      "nota": "El material de reserva del curso está agotado; ya no es posible facilitar útiles desde el colegio.",
+      "vence": null,
+      "origen": "Francisca Bravo Hernández · 23-10-2026",
+      "id": "auto-cuartob||revisar-diariamente-el-estuche-y-asegurarse-de-que-incluya-lapiz-grafito-y-los-materiales-basicos"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Enviar al menos una caja de pañuelos desechables para reponer el stock del curso",
+      "prioridad": "media",
+      "nota": "El curso se quedó sin pañuelos desechables. Se pide acusar recibo del correo.",
+      "vence": null,
+      "origen": "Francisca Bravo Hernández · 23-10-2026",
+      "id": "auto-cuartob||enviar-al-menos-una-caja-de-panuelos-desechables-para-reponer-el-stock-del-curso"
     }
   ],
   "evaluaciones": []
