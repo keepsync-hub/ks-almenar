@@ -213,13 +213,40 @@ const PORTAL = {
       origen: 'Cronograma 2° semestre · 2ª Reunión de Apoderados · 07-07-2026'
     },
     {
+      fecha: '2026-11-04',
+      curso: 'kinder',
+      titulo: 'Reunión de apoderados Kínder A',
+      tipo: 'Reunión',
+      detalle: 'Reunión de apoderados de Kínder A, el miércoles 4, dentro de la ventana del 3 al 5 que da el cronograma. La hora la confirma la profesora.',
+      accion: 'Asistir a la reunión',
+      origen: 'Calendario de noviembre de Kínder A · 26-10-2026'
+    },
+    {
+      fecha: '2026-11-06',
+      curso: 'kinder',
+      titulo: 'Despedida IV medio',
+      tipo: 'Actividad',
+      detalle: 'Despedida de los IV medios. Aparece en el calendario de Kínder A; los detalles los envía la profesora más cerca de la fecha.',
+      accion: null,
+      origen: 'Calendario de noviembre de Kínder A · 26-10-2026'
+    },
+    {
+      fecha: '2026-11-07',
+      curso: 'kinder',
+      titulo: 'Encuentro sobre ruedas',
+      tipo: 'Actividad',
+      detalle: 'Cae sábado, fuera de la jornada escolar habitual. Los detalles los envía la profesora más cerca de la fecha.',
+      accion: null,
+      origen: 'Calendario de noviembre de Kínder A · 26-10-2026'
+    },
+    {
       fecha: '2026-11-27',
       curso: 'kinder',
-      titulo: 'Día de aventuras kínder',
+      titulo: '"Día de aventuras y tesoros" kínder',
       tipo: 'Actividad',
       detalle: 'Actividad propia de kínder. Los detalles los envía la profesora más cerca de la fecha.',
       accion: null,
-      origen: 'Cronograma 2° semestre · 2ª Reunión de Apoderados · 07-07-2026'
+      origen: 'Cronograma 2° semestre · 07-07-2026 · nombre confirmado en el calendario de noviembre de Kínder A · 26-10-2026'
     },
     {
       fecha: '2026-12-07',
