@@ -193,12 +193,22 @@ const PORTAL = {
       origen: 'Cronograma 2° semestre · 2ª Reunión de Apoderados · 07-07-2026'
     },
     {
+      fecha: '2026-10-28',
+      curso: 'cuartob',
+      titulo: 'Salida al museo',
+      tipo: 'Actividad',
+      hora: 'Regreso 12:30–13:00 · clases 13:00 a 15:35',
+      detalle: 'Vuelven del museo entre las 12:30 y las 13:00 y almuerzan en el colegio. Después hay clases normales de 13:00 a 15:35.',
+      accion: 'Llevar colación abundante, agua y una mantita para picnic',
+      origen: 'Mensaje de apoderados 4° B · 26-10-2026'
+    },
+    {
       fecha: '2026-10-30',
       curso: 'colegio',
       titulo: 'Almenarte',
       tipo: 'Actividad',
       detalle: 'Muestra artística del colegio. El programa lo informa el colegio más cerca de la fecha.',
-      nota: 'Cae el mismo día que la entrega del trabajo de Ciencias de 4° B ("La Fuerza"). Conviene no dejarlo para el final.',
+      nota: 'Cae el mismo día que la evaluación de Ciencias Naturales de 4° B.',
       accion: null,
       origen: 'Cronograma 2° semestre · 2ª Reunión de Apoderados · 07-07-2026'
     },
@@ -308,6 +318,51 @@ const PORTAL = {
       nota: 'Aviso preventivo y general del curso. Mantener revisiones posteriores para que no vuelva a aparecer.',
       vence: null,
       origen: 'Francisca Bravo · 25-08-2026'
+    },
+    {
+      id: 'ziploc-tesoro-26oct',
+      curso: 'cuartob',
+      texto: 'Mandar 4 bolsas ziploc GRANDES marcadas con nombre completo',
+      prioridad: 'urgente',
+      nota: 'Van el lunes 26. Son para el Entierro del Tesoro.',
+      vence: '2026-10-26',
+      origen: 'Mensaje de apoderados 4° B · 26-10-2026'
+    },
+    {
+      curso: 'cuartob',
+      texto: 'Enviar la carta familiar y 4 bolsas ziploc grandes (con nombre y apellido del estudiante) a secretaría (Érika) entre el 22 y el 28 de octubre',
+      prioridad: 'urgente',
+      nota: 'Actualizado el 26-10: las cartas y fotografías van a Érika todas en un sobre marcado con el nombre completo del estudiante, a más tardar el miércoles 28. Las bolsas ziploc se mandan el lunes 26.',
+      vence: '2026-10-28',
+      origen: 'Francisca Bravo Hernández · 13-10-2026 + Mensaje de apoderados 4° B · 26-10-2026',
+      id: 'cartas-tesoro-28oct'
+    },
+    {
+      id: 'museo-28oct',
+      curso: 'cuartob',
+      texto: 'Preparar colación abundante, agua y mantita de picnic para el museo',
+      prioridad: 'alta',
+      nota: 'Salida del miércoles 28. Regresan entre 12:30 y 13:00, almuerzan en el colegio y tienen clases hasta las 15:35.',
+      vence: '2026-10-28',
+      origen: 'Mensaje de apoderados 4° B · 26-10-2026'
+    },
+    {
+      id: 'materiales-ciencias-30oct',
+      curso: 'cuartob',
+      texto: 'Revisar en Lirmi los materiales para la evaluación de Ciencias del viernes 30',
+      prioridad: 'alta',
+      nota: 'Hay que llevarlos el mismo viernes.',
+      vence: '2026-10-30',
+      origen: 'Mensaje de apoderados 4° B · 26-10-2026'
+    },
+    {
+      id: 'cabezas-estuche-26oct',
+      curso: 'cuartob',
+      texto: 'Revisar cabezas y reponer los útiles del estuche',
+      prioridad: 'media',
+      nota: 'Piojos: revisar y tratar si hay. Estuche: lápiz grafito, goma, tijeras y lo básico.',
+      vence: '2026-11-01',
+      origen: 'Mensaje de apoderados 4° B · 26-10-2026'
     },
     {
       id: 'chilenidad-polca-kinder',
@@ -444,7 +499,8 @@ const PORTAL = {
       { fecha: '2026-10-15', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Unidad 3', formato: 'Prueba escrita', detalle: 'Jornada de doble evaluación junto con Inglés.', origen: 'Calendario 4°B' },
       { fecha: '2026-10-15', curso: 'cuartob', asignatura: 'Inglés', titulo: 'Unidad "Health Matters"', formato: 'Prueba escrita', detalle: 'Jornada de doble evaluación junto con Lenguaje.', origen: 'Calendario 4°B' },
       { fecha: '2026-10-19', curso: 'cuartob', asignatura: 'Historia, Geografía y C. Sociales', titulo: 'Civilización Inca', formato: 'Prueba escrita', detalle: 'Enfocada exclusivamente en la civilización Inca.', origen: 'Calendario 4°B' },
-      { fecha: '2026-10-30', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Trabajo: La Fuerza', formato: 'Trabajo de investigación', detalle: 'Tipos de fuerzas, efectos, fuerzas de contacto y a distancia.', origen: 'Calendario 4°B' },
+      { fecha: '2026-10-29', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Prueba de Lenguaje', formato: 'Prueba escrita', detalle: 'El temario está en Lirmi.', origen: 'Mensaje de apoderados 4° B · 26-10-2026' },
+      { fecha: '2026-10-30', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'Evaluación: La Fuerza', formato: 'Evaluación con materiales', detalle: 'Tipos de fuerzas, efectos, fuerzas de contacto y a distancia. Hay que llevar los materiales que indica Lirmi.', origen: 'Calendario 4°B + Mensaje de apoderados 4° B · 26-10-2026' },
       { fecha: '2026-11-09', curso: 'cuartob', asignatura: 'Matemática', titulo: 'Unidad 3: Medición', formato: 'Prueba escrita', detalle: 'Tiempo, longitud, áreas y volumen.', origen: 'Calendario 4°B' },
       { fecha: '2026-11-19', curso: 'cuartob', asignatura: 'Lenguaje y Comunicación', titulo: 'Lectura de libre elección', formato: 'Evaluación de lectura', detalle: 'El libro lo elige el propio estudiante.', origen: 'Calendario 4°B' },
       { fecha: '2026-11-20', curso: 'cuartob', asignatura: 'Ciencias Naturales', titulo: 'La Tierra', formato: 'Prueba escrita', detalle: 'Estructura de la Tierra, volcanes, terremotos y medidas de seguridad.', origen: 'Calendario 4°B' },
