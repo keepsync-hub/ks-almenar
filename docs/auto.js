@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-24T10:01:18.635Z",
+  "generado": "2026-10-27T10:01:19.659Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -100,6 +100,24 @@ const PORTAL_AUTO = {
       "vence": null,
       "origen": "Francisca Bravo Hernández · 23-10-2026",
       "id": "auto-cuartob||enviar-al-menos-una-caja-de-panuelos-desechables-para-reponer-el-stock-del-curso"
+    },
+    {
+      "curso": "kinder",
+      "texto": "Enviar firmada la autorización del \"Día de aventuras\" a más tardar el viernes 30 de octubre",
+      "prioridad": "urgente",
+      "nota": "La información sobre la actividad fue enviada en la agenda del lunes 26 de octubre y también adjunta por correo.",
+      "vence": "2026-10-30",
+      "origen": "Cynthia Argandoña · 26-10-2026",
+      "id": "auto-kinder||enviar-firmada-la-autorizacion-del-dia-de-aventuras-a-mas-tardar-el-viernes-30-de-octubre"
+    },
+    {
+      "curso": "kinder",
+      "texto": "Enviar la ficha de emergencia la semana previa al \"Día de aventuras\" (semana del 24 de noviembre)",
+      "prioridad": "alta",
+      "nota": "Se pide que llegue esa semana para mantener la información lo más actualizada posible.",
+      "vence": "2026-11-27",
+      "origen": "Cynthia Argandoña · 26-10-2026",
+      "id": "auto-kinder||enviar-la-ficha-de-emergencia-la-semana-previa-al-dia-de-aventuras-semana-del-24-de-noviembre"
     }
   ],
   "evaluaciones": []
