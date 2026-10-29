@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-28T10:01:16.785Z",
+  "generado": "2026-10-29T10:01:33.399Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -37,6 +37,17 @@ const PORTAL_AUTO = {
       "lugar": null,
       "accion": "Enviar materiales según cronograma: libreta el 14/10, cartas de la familia entre el 22 y 28/10, 4 bolsas ziploc grandes con nombre, y caja plástica lista para el 3/11",
       "origen": "Francisca Bravo Hernández · 13-10-2026"
+    },
+    {
+      "fecha": "2026-11-06",
+      "curso": "cuartob",
+      "titulo": "Túnel y convivencia — Despedida IV° medio",
+      "tipo": "Actividad",
+      "detalle": "El curso despide a una alumna de IV° medio con una convivencia especial que reemplaza el almuerzo. Se necesita banda y corona con su nombre, y un regalo de parte del curso.",
+      "hora": null,
+      "lugar": null,
+      "accion": "Coordinarse con los delegados para organizar la convivencia, la banda, la corona y el regalo",
+      "origen": "Francisca Bravo Hernández · 28-10-2026"
     }
   ],
   "recordatorios": [
@@ -129,6 +140,15 @@ const PORTAL_AUTO = {
       "vence": "2026-11-27",
       "origen": "Cynthia Argandoña · 26-10-2026",
       "id": "auto-kinder||enviar-la-ficha-de-emergencia-la-semana-previa-al-dia-de-aventuras-semana-del-24-de-noviembre"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Coordinarse con los delegados para organizar la convivencia de despedida del 6 de noviembre: banda y corona con el nombre de Fernanda, y un regalo de parte del curso",
+      "prioridad": "alta",
+      "nota": "La profesora puede averiguar los gustos de Fernanda antes de comprar el regalo. Se pide acusar recibo del correo.",
+      "vence": "2026-11-06",
+      "origen": "Francisca Bravo Hernández · 28-10-2026",
+      "id": "auto-cuartob||coordinarse-con-los-delegados-para-organizar-la-convivencia-de-despedida-del-6-de-noviembre-banda-y-corona-con-el-nombre-de-fernanda-y-un-regalo-de-parte-del-curso"
     }
   ],
   "evaluaciones": []
