@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-29T10:01:33.399Z",
+  "generado": "2026-10-31T10:01:26.263Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -48,6 +48,17 @@ const PORTAL_AUTO = {
       "lugar": null,
       "accion": "Coordinarse con los delegados para organizar la convivencia, la banda, la corona y el regalo",
       "origen": "Francisca Bravo Hernández · 28-10-2026"
+    },
+    {
+      "fecha": "2026-11-09",
+      "curso": "cuartob",
+      "titulo": "Entierro del Tesoro — 4° B",
+      "tipo": "Actividad",
+      "detalle": "Cada niño/a guarda en su bolsa los elementos que desea conservar y enterrar. El entierro está programado para el lunes 9 de noviembre.",
+      "hora": null,
+      "lugar": null,
+      "accion": "Asegurarse de que la carta llegue antes del lunes 2 de noviembre",
+      "origen": "Francisca Bravo Hernández · 30-10-2026"
     }
   ],
   "recordatorios": [
@@ -149,6 +160,15 @@ const PORTAL_AUTO = {
       "vence": "2026-11-06",
       "origen": "Francisca Bravo Hernández · 28-10-2026",
       "id": "auto-cuartob||coordinarse-con-los-delegados-para-organizar-la-convivencia-de-despedida-del-6-de-noviembre-banda-y-corona-con-el-nombre-de-fernanda-y-un-regalo-de-parte-del-curso"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Enviar la carta del Tesoro dentro de un sobre cerrado y marcado con el nombre del niño/a, a más tardar el lunes 2 de noviembre",
+      "prioridad": "urgente",
+      "nota": "El plazo original era el 30 de octubre, pero se extendió excepcionalmente al lunes 2/11 por la baja cantidad de entregas. Después de esa fecha no se recibirán más cartas. La carta debe ir dentro de un sobre, no como hoja suelta.",
+      "vence": "2026-11-02",
+      "origen": "Francisca Bravo Hernández · 30-10-2026",
+      "id": "auto-cuartob||enviar-la-carta-del-tesoro-dentro-de-un-sobre-cerrado-y-marcado-con-el-nombre-del-nino-a-a-mas-tardar-el-lunes-2-de-noviembre"
     }
   ],
   "evaluaciones": []
