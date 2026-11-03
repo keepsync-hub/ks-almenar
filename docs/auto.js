@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-10-31T10:01:26.263Z",
+  "generado": "2026-11-03T10:01:39.395Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -39,6 +39,39 @@ const PORTAL_AUTO = {
       "origen": "Francisca Bravo Hernández · 13-10-2026"
     },
     {
+      "fecha": "2026-11-04",
+      "curso": "cuartob",
+      "titulo": "Reunión de apoderados 4° B",
+      "tipo": "Reunion",
+      "detalle": "Última reunión de apoderados del año, el miércoles 4 de noviembre a las 19:00 horas.",
+      "hora": "19:00",
+      "lugar": null,
+      "accion": "Asistir",
+      "origen": "Francisca Bravo Hernández · 02-11-2026"
+    },
+    {
+      "fecha": "2026-11-04",
+      "curso": "cuartob",
+      "titulo": "SIMCE 4° básico — primera jornada",
+      "tipo": "Actividad",
+      "detalle": "Primera jornada de evaluación SIMCE para 4° básico. Las fechas correctas son el 4 y 5 de noviembre (el documento adjunto indica por error el 28 y 29 de octubre).",
+      "hora": null,
+      "lugar": null,
+      "accion": "Revisar el documento informativo adjunto",
+      "origen": "Francisca Bravo Hernández · 02-11-2026"
+    },
+    {
+      "fecha": "2026-11-05",
+      "curso": "cuartob",
+      "titulo": "SIMCE 4° básico — segunda jornada",
+      "tipo": "Actividad",
+      "detalle": "Segunda jornada de evaluación SIMCE para 4° básico.",
+      "hora": null,
+      "lugar": null,
+      "accion": null,
+      "origen": "Francisca Bravo Hernández · 02-11-2026"
+    },
+    {
       "fecha": "2026-11-06",
       "curso": "cuartob",
       "titulo": "Túnel y convivencia — Despedida IV° medio",
@@ -48,6 +81,17 @@ const PORTAL_AUTO = {
       "lugar": null,
       "accion": "Coordinarse con los delegados para organizar la convivencia, la banda, la corona y el regalo",
       "origen": "Francisca Bravo Hernández · 28-10-2026"
+    },
+    {
+      "fecha": "2026-11-06",
+      "curso": "cuartob",
+      "titulo": "Salida temprana — viernes 6 de noviembre",
+      "tipo": "Actividad",
+      "detalle": "El viernes 6, luego del túnel de IV° medio, la salida es a las 13:00 horas.",
+      "hora": "Salida 13:00",
+      "lugar": null,
+      "accion": "Retirar a las 13:00",
+      "origen": "Francisca Bravo Hernández · 02-11-2026"
     },
     {
       "fecha": "2026-11-09",
