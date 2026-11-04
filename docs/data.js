@@ -293,6 +293,15 @@ const PORTAL = {
   /* ---------------- RECORDATORIOS ---------------- */
   recordatorios: [
     {
+      id: 'libro-merlin-ingles',
+      curso: 'cuartob',
+      texto: 'Mandar el libro "Merlin" en la mochila para Inglés',
+      prioridad: 'alta',
+      nota: 'Lo pide la profesora de Inglés desde el martes 3 de noviembre ("próxima semana a partir del martes 3"): llevarlo los días con clase de Inglés. El aviso no dice hasta cuándo; el vencimiento es aproximado, hasta el proyecto final de Inglés del 2 de diciembre.',
+      vence: '2026-12-02',
+      origen: 'Lirmi · Paty (Patricia Alvarado, profesora de Inglés) · 27-10-2026'
+    },
+    {
       id: 'estudiar-27ago',
       curso: 'cuartob',
       texto: 'Preparar la prueba de Lenguaje del jueves 27',
