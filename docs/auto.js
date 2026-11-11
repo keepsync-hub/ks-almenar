@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-03T10:01:39.395Z",
+  "generado": "2026-11-11T10:01:23.222Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -213,6 +213,15 @@ const PORTAL_AUTO = {
       "vence": "2026-11-02",
       "origen": "Francisca Bravo Hernández · 30-10-2026",
       "id": "auto-cuartob||enviar-la-carta-del-tesoro-dentro-de-un-sobre-cerrado-y-marcado-con-el-nombre-del-nino-a-a-mas-tardar-el-lunes-2-de-noviembre"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Reforzar desde casa la importancia de mantener buena disposición frente al trabajo escolar: escuchar instrucciones, respetar acuerdos de convivencia y asumir con responsabilidad las actividades diarias",
+      "prioridad": "habito",
+      "nota": "La profesora observa dificultades generalizadas del curso para seguir instrucciones y finalizar actividades en esta etapa final del año.",
+      "vence": null,
+      "origen": "Francisca Bravo Hernández · 10-11-2026",
+      "id": "auto-cuartob||reforzar-desde-casa-la-importancia-de-mantener-buena-disposicion-frente-al-trabajo-escolar-escuchar-instrucciones-respetar-acuerdos-de-convivencia-y-asumir-con-responsabilidad-las-actividades-diarias"
     }
   ],
   "evaluaciones": []
