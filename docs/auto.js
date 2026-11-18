@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-11T10:01:23.222Z",
+  "generado": "2026-11-18T10:01:22.610Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -222,6 +222,15 @@ const PORTAL_AUTO = {
       "vence": null,
       "origen": "Francisca Bravo Hernández · 10-11-2026",
       "id": "auto-cuartob||reforzar-desde-casa-la-importancia-de-mantener-buena-disposicion-frente-al-trabajo-escolar-escuchar-instrucciones-respetar-acuerdos-de-convivencia-y-asumir-con-responsabilidad-las-actividades-diarias"
+    },
+    {
+      "curso": "kinder",
+      "texto": "Reforzar en casa los acuerdos del taller de convivencia: si alguien pide parar, el juego se detiene; usar frases como «No me gusta» o «Para, por favor»",
+      "prioridad": "habito",
+      "nota": "El Área de Convivencia Educativa está realizando un taller de dos sesiones con el curso sobre juego seguro, cuidado del cuerpo y expresión de límites. La profesora pide que las familias refuercen estos acuerdos durante los juegos compartidos en casa.",
+      "vence": null,
+      "origen": "Pamela Sapag, Encargada de Convivencia Educativa · 17-11-2026",
+      "id": "auto-kinder||reforzar-en-casa-los-acuerdos-del-taller-de-convivencia-si-alguien-pide-parar-el-juego-se-detiene-usar-frases-como-no-me-gusta-o-para-por-favor"
     }
   ],
   "evaluaciones": []
