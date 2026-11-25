@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-18T10:01:22.610Z",
+  "generado": "2026-11-25T10:01:21.416Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -231,6 +231,15 @@ const PORTAL_AUTO = {
       "vence": null,
       "origen": "Pamela Sapag, Encargada de Convivencia Educativa · 17-11-2026",
       "id": "auto-kinder||reforzar-en-casa-los-acuerdos-del-taller-de-convivencia-si-alguien-pide-parar-el-juego-se-detiene-usar-frases-como-no-me-gusta-o-para-por-favor"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Reforzar en casa acuerdos sobre el uso de pantallas: promover diálogo familiar, establecer límites y animar a los niños a acudir a un adulto si encuentran contenido incómodo o inadecuado",
+      "prioridad": "habito",
+      "nota": "El equipo de Psicología y Convivencia realizó el taller «¿Quién tiene el control?» con 4° B, sobre autorregulación frente a videojuegos, redes sociales y pantallas.",
+      "vence": null,
+      "origen": "Alexandra Droguett Pajarito, Psicóloga Educacional · 24-11-2026",
+      "id": "auto-cuartob||reforzar-en-casa-acuerdos-sobre-el-uso-de-pantallas-promover-dialogo-familiar-establecer-limites-y-animar-a-los-ninos-a-acudir-a-un-adulto-si-encuentran-contenido-incomodo-o-inadecuado"
     }
   ],
   "evaluaciones": []
