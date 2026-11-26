@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-25T10:01:21.416Z",
+  "generado": "2026-11-26T10:01:32.225Z",
   "eventos": [
     {
       "fecha": "2026-10-13",
@@ -103,6 +103,28 @@ const PORTAL_AUTO = {
       "lugar": null,
       "accion": "Asegurarse de que la carta llegue antes del lunes 2 de noviembre",
       "origen": "Francisca Bravo Hernández · 30-10-2026"
+    },
+    {
+      "fecha": "2026-11-30",
+      "curso": "cuartob",
+      "titulo": "Horario de salida especial: semana del 30 de noviembre al 4 de diciembre",
+      "tipo": "Actividad",
+      "detalle": "Del lunes 30 de noviembre al viernes 4 de diciembre, la salida de 1° a 6° básico es a las 14:50 horas.",
+      "hora": "Salida 14:50",
+      "lugar": null,
+      "accion": "Retirar a las 14:50",
+      "origen": "Francisca Bravo Hernández · 25-11-2026"
+    },
+    {
+      "fecha": "2026-12-09",
+      "curso": "cuartob",
+      "titulo": "Horario de salida especial: miércoles 9 al viernes 11 de diciembre",
+      "tipo": "Actividad",
+      "detalle": "Del miércoles 9 al viernes 11 de diciembre, la salida de los ciclos Rilán e Inapire es a las 12:30 horas.",
+      "hora": "Salida 12:30",
+      "lugar": null,
+      "accion": "Retirar a las 12:30",
+      "origen": "Francisca Bravo Hernández · 25-11-2026"
     }
   ],
   "recordatorios": [
