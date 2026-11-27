@@ -3,19 +3,8 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-26T10:01:32.225Z",
+  "generado": "2026-11-27T10:01:16.342Z",
   "eventos": [
-    {
-      "fecha": "2026-10-13",
-      "curso": "kinder",
-      "titulo": "Reunión informativa: \"Día de aventuras y tesoros\"",
-      "tipo": "Reunion",
-      "detalle": "Reunión para compartir la planificación y cronograma de la actividad \"Día de aventuras y tesoros\", que se realizará el 27 de noviembre. Es obligatoria la asistencia de al menos un representante por niño/a.",
-      "hora": "08:30",
-      "lugar": "Biblioteca del colegio",
-      "accion": "Asistir — mínimo un representante por niño/a",
-      "origen": "Cynthia Argandoña · 02-10-2026"
-    },
     {
       "fecha": "2026-10-30",
       "curso": "cuartob",
