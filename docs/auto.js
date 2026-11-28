@@ -3,7 +3,7 @@
    Lo que se edita a mano va en data.js, que n8n nunca toca. */
 
 const PORTAL_AUTO = {
-  "generado": "2026-11-27T10:01:16.342Z",
+  "generado": "2026-11-28T10:01:23.146Z",
   "eventos": [
     {
       "fecha": "2026-10-30",
@@ -114,6 +114,17 @@ const PORTAL_AUTO = {
       "lugar": null,
       "accion": "Retirar a las 12:30",
       "origen": "Francisca Bravo Hernández · 25-11-2026"
+    },
+    {
+      "fecha": "2026-12-11",
+      "curso": "cuartob",
+      "titulo": "Convivencia de curso — cierre de año 4° B",
+      "tipo": "Actividad",
+      "detalle": "Jornada de cierre con reconocimiento al Mejor Compañero/a, entrega de regalo del amigo secreto y convivencia con fajitas y pizza.",
+      "hora": null,
+      "lugar": null,
+      "accion": "Colaborar con comida para la convivencia (fajitas o pizza)",
+      "origen": "Francisca Bravo Hernández · 27-11-2026"
     }
   ],
   "recordatorios": [
@@ -251,6 +262,15 @@ const PORTAL_AUTO = {
       "vence": null,
       "origen": "Alexandra Droguett Pajarito, Psicóloga Educacional · 24-11-2026",
       "id": "auto-cuartob||reforzar-en-casa-acuerdos-sobre-el-uso-de-pantallas-promover-dialogo-familiar-establecer-limites-y-animar-a-los-ninos-a-acudir-a-un-adulto-si-encuentran-contenido-incomodo-o-inadecuado"
+    },
+    {
+      "curso": "cuartob",
+      "texto": "Revisar con el/la estudiante a quién le corresponde regalar en el amigo secreto y comprar o confeccionar un regalo de máximo $10.000",
+      "prioridad": "alta",
+      "nota": "El regalo debe llegar al colegio a más tardar el miércoles 9 de diciembre.",
+      "vence": "2026-12-09",
+      "origen": "Francisca Bravo Hernández · 27-11-2026",
+      "id": "auto-cuartob||revisar-con-el-la-estudiante-a-quien-le-corresponde-regalar-en-el-amigo-secreto-y-comprar-o-confeccionar-un-regalo-de-maximo-10-000"
     }
   ],
   "evaluaciones": []
